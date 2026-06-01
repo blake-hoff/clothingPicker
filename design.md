@@ -9,19 +9,17 @@ This is intended to be used for data collection for a later application which wi
 ## 2. Requirements
 - [ ] User must be able to log in to store their information on the database. Each entry has their user id associated with the clothing.
 
-- ( ) User must be able to view their clothing history in a list.
+- [ ] User must be able to view their clothing history in a list.
 
-- [] User must be able to add a new clothing entry for today. They must add text and 
+- [ ] User must be able to add a new clothing entry for today. They must add text and 
 
 - [ ] A clothing entry must have a top / bottom at minimum. (Shirt/Pants) However, a user can add new categories if desired.
 
-- [] The user can only do one entry per day, but it will automatically add it as todays date. 
+- [ ] The user can only do one entry per day, but it will automatically add it as todays date. 
 
-- [] If the user already has a entry for today, it will show an error message.
+- [ ] If the user already has a entry for today, it will show an error message.
 
-- [for much later] the user can use their clothing history to predict what they want to wear later.
-
-- () test checkbox [] - ( ) - - _ () - () - [] [ ]
+- [ ] (much later) the user can use their clothing history to predict what they want to wear later.
 
 ## 3. User story
 - Step 1: User makes account and logs in.
