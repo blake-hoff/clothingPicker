@@ -1,0 +1,11 @@
+datetime
+
+flask
+
+flask_cors
+
+requests
+
+flask_sqlalchemy
+
+sqlalchemy

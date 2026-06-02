@@ -1,5 +1,4 @@
 # Clothing Picker App
-<!-- ## -->
 
 ## 1. Use Case
 A person that wants to track the clothes they have worn easily, instead of using a simple note app.
