@@ -26,7 +26,8 @@ def base_page():
 @app.route('/api/view/', methods=['GET'])
 def get_all_items():
     # Get all entries in the database
-    items = Item.query.all()
+    items = Outfit.query.all()
+    print(items)
 
     #this can use flask login which is not set up yet.
     # user_items = UserItem.query.filter_by(user_id=current_user.id).all()
@@ -35,16 +36,15 @@ def get_all_items():
 
     return jsonify({
         'success': True,
-        'items': [{'date': item.created_at, 'description': item.description} for item in items]
+        'items': [{'name':'tempName', 'id': item.id, 'icon':item.icon,'date': item.created_at, 'description': item.description} for item in items]
     }), 200
 
 # Create an entry in the database
 @app.route('/api/create/', methods=['POST'])
-def get_item_details():
-    print('hi')
+def create_outfit():
+    print('create_outfit')
     # see if an entry has been created for today
-    # isEntryToday = lookupTodayEntry(Outfit)
-    # Item.query.sort_by(created_at).first()
+    isEntryToday = lookupTodayEntry(Outfit)
 
     data = request.get_json()
     print(data)
@@ -55,11 +55,17 @@ def get_item_details():
     usersDesc = data.get("description")
 
     # if it is not in the database we need to add it.
-    # if not item:
-    #     # add to database
-    #     entry = Outfit(description=payloadDesc)
-    #     db.session.add(entry)
-    #     db.session.commit()
+    if not isEntryToday:
+      # add to database
+        entry = Outfit(name='blake',
+                       description=usersDesc,
+                       icon='https://images.unsplash.com/vector-1775556825284-3b697bc284bf?q=80&w=1480&auto=format&fit=crop&ixlib=rb-4.1.0'
+
+                       )
+        db.session.add(entry)
+        db.session.commit()
+    else:
+        print('cannot add outfit for a day that already exists')
 
     # item_data = {
     #     "id": item.roblox_item_id,

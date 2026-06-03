@@ -22,8 +22,15 @@ const App = () => {
 
 	let link = 'http://127.0.0.1:5000/api'
 
+	const handleToggleExpand = (id) => {
+		setExpanded(prev => ({
+			...prev,
+			[id]: !prev[id]
+		}));
+	};
+
 	const getAll = React.useCallback(async () => {
-		let path = '/item/';
+		let path = '/view/';
 		let url = link + path;
 
 		try {
@@ -31,6 +38,7 @@ const App = () => {
 			const text = await response.text();
 			const cleanText = text.replace(/:NaN/g, ':null');
 			const newData = JSON.parse(cleanText);
+			console.log(newData.items);
 
 			setGridData(newData.items);
 		} 
@@ -69,7 +77,7 @@ const App = () => {
 			// setEntryValue(''); // clear the text field
 
 			// setShowCatalog(true);
-			// getAll();
+			getAll();
 		} 
 		catch (err) {
 			console.error(err);
@@ -110,9 +118,9 @@ const App = () => {
 
 		<Box sx={{display: "flex", alignItems: "center", gap: 2, padding: 2, borderBottom: "1px solid rgba(255,255,255,0.2)"}}>
 			{/* refresh button */}
-			{/* <IconButton onClick={getAll} sx={{backgroundColor: "secondary.main", color: "white", "&:hover": { backgroundColor: "secondary.dark" }}}>
+			<IconButton onClick={getAll} sx={{backgroundColor: "secondary.main", color: "white", "&:hover": { backgroundColor: "secondary.dark" }}}>
 				<RefreshIcon />
-			</IconButton> */}
+			</IconButton>
 			
 			<TextField 
 				id="outlined-controlled" 
@@ -126,34 +134,35 @@ const App = () => {
 			{/* search catalog*/}
 			<Button onClick={() => createEntry()} variant="outlined">Create</Button>
 
-			{/* catalog search results */}
-			{showCatalog && (catalogData.length > 0) && (
-				<Box
-					sx={{
-						width: "30%", maxHeight: 100, // allows to see at least 3 items
-						overflowY: "auto",
-						// mt: 3, // top space above
-						border: "3px solid #ffffff",
-						borderRadius: 12,
-						backgroundColor: "#006CC5",
-						color: "#000000",
-						
-						// hidiing the scroll bar
-						"&::-webkit-scrollbar": {display: "none",}, scrollbarWidth: "none", msOverflowStyle: "none",
-					}}
-				>
-					{catalogData.map((item) => (
-					<Box
-						key={item.id} 
-						onClick={() => handleItemClick(item.id)}
-						sx={{padding: 2, cursor: "pointer", borderBottom: "1px solid #333", "&:hover": {backgroundColor: "secondary.dark", color: "#ffffff"},}}
-					>
-						{item.name}
-					</Box>
-					))}
-				</Box>
-			)}
+
 		</Box>
+
+
+
+		<Grid container spacing={2} mt={4} justifyContent={'center'}>
+		{gridData.map((item) => (
+			<Grid item xs={12} sm={6} md={4} key={item.id}>
+				<Card
+				sx={{backgroundColor: "#222", color: "white", width: "100%", maxWidth: 400, overflow: "hidden"}}>
+					<CardMedia component="img" height="400" image={item.icon} alt={item.name}/>
+					
+					<CardContent>
+						<Box display="flex" justifyContent="space-between" alignItems="center">
+							<Typography variant="h6">
+							{item.date}
+							</Typography>
+						</Box>
+
+						<Box mt={2}>
+							<Typography variant="body1" mt={1} sx={{wordBreak: "break-word", overflowWrap: "anywhere", whiteSpace: "normal"}}>
+								Outfit Description: {item.description}
+							</Typography>
+						</Box>
+					</CardContent>
+				</Card>
+			</Grid>
+		))}
+		</Grid>
 
     </div>
   );
