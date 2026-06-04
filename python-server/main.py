@@ -22,12 +22,50 @@ def base_page():
         'success': True,
     }), 200
 
+# populate database for missing days in the database
+@app.route('/api/populate/', methods=['POST'])
+def populate_db():
+    print('populate db')
+    # see if an entry has been created for today
+    # isEntryToday = lookupTodayEntry(Outfit)
+
+    data = request.get_json() # data sent from the user frontend
+    print(data)
+    
+    if not data:
+        return jsonify({"error": "Missing JSON payload"}), 400
+        
+    usersDesc = data.get("description")
+
+    # if it is not in the database we need to add it.
+    # add to database
+    entry = Outfit(description=usersDesc,
+                    icon='https://images.unsplash.com/vector-1775556825284-3b697bc284bf?q=80&w=1480&auto=format&fit=crop&ixlib=rb-4.1.0',
+                    # date.
+                    )
+    db.session.add(entry)
+    db.session.commit()
+    print('cannot add outfit for a day that already exists')
+
+    # user_data = {
+    #     "id": Outfit.id,
+    #     "name": Outfit.name,
+    #     "description": Outfit.description,
+    #     "time-created": Outfit.created_at,
+    #     "icon": Outfit.icon
+    # }
+
+    return jsonify({
+        'success': True,
+        'item': usersDesc
+    }), 200
+
 # Get all entries
 @app.route('/api/view/', methods=['GET'])
 def get_all_items():
     # Get all entries in the database
-    items = Outfit.query.all()
-    print(items)
+    items = Outfit.query.order_by(Outfit.created_at.desc())
+    # print(items)
 
     #this can use flask login which is not set up yet.
     # user_items = UserItem.query.filter_by(user_id=current_user.id).all()
@@ -36,7 +74,13 @@ def get_all_items():
 
     return jsonify({
         'success': True,
-        'items': [{'name':'tempName', 'id': item.id, 'icon':item.icon,'date': item.created_at, 'description': item.description} for item in items]
+        'items': [{'name':'tempName', 
+                   'id': item.id,
+                    'icon':item.icon,
+                    'date': item.created_at,
+                    'entry_date':item.entry_date,
+                    'description': item.description
+                    } for item in items]
     }), 200
 
 # Create an entry in the database
@@ -45,8 +89,9 @@ def create_outfit():
     print('create_outfit')
     # see if an entry has been created for today
     isEntryToday = lookupTodayEntry(Outfit)
+    isEntryToday = False
 
-    data = request.get_json()
+    data = request.get_json() # data sent from the user frontend
     print(data)
     
     if not data:
@@ -56,24 +101,28 @@ def create_outfit():
 
     # if it is not in the database we need to add it.
     if not isEntryToday:
+        print(f'date time today {datetime.date.today()}')
       # add to database
-        entry = Outfit(name='blake',
-                       description=usersDesc,
-                       icon='https://images.unsplash.com/vector-1775556825284-3b697bc284bf?q=80&w=1480&auto=format&fit=crop&ixlib=rb-4.1.0'
-
+        entry = Outfit(name='User',
+                        description=usersDesc,
+                        icon='https://images.unsplash.com/vector-1775556825284-3b697bc284bf?q=80&w=1480&auto=format&fit=crop&ixlib=rb-4.1.0',
+                        entry_date=datetime.date.today()
                        )
         db.session.add(entry)
         db.session.commit()
     else:
-        print('cannot add outfit for a day that already exists')
+        # print('cannot add outfit for a day that already exists')
+        return jsonify({
+        'success': False,
+        'message': 'Cannot add an outfit for a day that already exists.'
+    }), 403
 
-    # item_data = {
-    #     "id": item.roblox_item_id,
-    #     "name": item.name,
-    #     "description": item.description,
-    #     "quantity": item.quantity,
-    #     "time-created": item.created_at,
-    #     "icon": item.icon
+    # user_data = {
+    #     "id": Outfit.id,
+    #     "name": Outfit.name,
+    #     "description": Outfit.description,
+    #     "time-created": Outfit.created_at,
+    #     "icon": Outfit.icon
     # }
 
     return jsonify({

@@ -11,9 +11,17 @@ class Outfit(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
 
-    name = db.Column(db.String(255), nullable=False)
+    name = db.Column(db.String(255), nullable=True)
     description = db.Column(db.Text, nullable=True)
 
     icon = db.Column(db.String(255), nullable=True)
-    created_at = db.Column(db.DateTime(),server_default=func.now(),nullable=False)
+
+    
+    created_at = db.Column(db.DateTime(), 
+                           server_default=func.now(),
+                           nullable=False)
+    
+    # created at is for the actual time created for tracking purposes. 
+    # the entry date is for the calendar date entry on frontend sorting and uses a simpler format.
+    entry_date = db.Column(db.Date, nullable=False) # format is year-month-day (2026-06-04)
 

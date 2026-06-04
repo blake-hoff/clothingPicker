@@ -96,7 +96,8 @@ const App = () => {
 		}
 	};
 
-
+	// functions to call right when the app start.
+	useEffect(() => {getAll();}, [getAll]); // populate the list/grid
 
   return (
     <div className="App">
@@ -125,7 +126,7 @@ const App = () => {
 			<TextField 
 				id="outlined-controlled" 
 				
-				sx={{input: { color: "black" }, label: {color: "secondary.dark"}, border: "1px solid rgba(0,0,255,0)", "&:hover": { backgroundColor: "white" }}}
+				sx={{input: { color: "secondary.dark" }, label: {color: "white"}, border: "1px solid #4f86f8", "&:hover": { backgroundColor: "secondary.main" }}}
 				label="Enter outfit here" 
 				value={entryValue} 
 				onChange={(event) => {setEntryValue(event.target.value);}}
