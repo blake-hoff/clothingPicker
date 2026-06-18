@@ -22,6 +22,18 @@ const generateDateRange = (range) => {
 	return dates;
 };
 
+// convert a datetime object from the server to a more readable format for the frontend.
+const formatDate = (dateStr) => {
+  const d = new Date(dateStr);
+
+  return d.toLocaleDateString("en-US", {
+    timeZone: "UTC",
+    weekday: "long",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
 
 
 const App = () => {
@@ -143,7 +155,25 @@ const App = () => {
 			<TextField 
 				id="outlined-controlled" 
 				
-				sx={{input: { color: "secondary.dark" }, label: {color: "white"}, border: "1px solid #4f86f8", "&:hover": { backgroundColor: "secondary.main" }}}
+				
+			sx={{"& .MuiOutlinedInput-root": 
+					{color: "#afc8fb","& fieldset": {borderColor: "#4f86f8",},
+
+					"&:hover fieldset": {
+					borderColor: "#afc8fb", 
+					},
+
+					"&.Mui-focused fieldset": {
+					borderColor: "#4f86f8",
+					borderWidth: "2px",
+					},
+				},
+
+				"& .MuiInputLabel-root": {
+					color: "#afc8fb",
+				},
+			}}
+
 				label="Enter outfit here" 
 				value={entryValue} 
 				onChange={(event) => {setEntryValue(event.target.value);}}
@@ -166,8 +196,7 @@ const App = () => {
 					<CardContent>
 						<Box display="flex" justifyContent="space-between" alignItems="center">
 							<Typography variant="h6">
-							{/* {item.date} */}
-							{new Date(item.date).toDateString()}
+								{formatDate(item.date)}  
 							</Typography>
 						</Box>
 

@@ -91,7 +91,7 @@ def create_outfit():
     # see if an entry has been created for the given date from the user.
     # if the entry already exists, should be updated with the new version
     # isEntryToday = lookupTodayEntry(Outfit)
-    # isEntryToday = False
+    isEntryToday = False
 
     data = request.get_json() # data sent from the user frontend
     print(data)
