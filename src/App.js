@@ -2,33 +2,39 @@ import './App.css';
 import * as React from 'react';
 
 import Button from '@mui/material/Button';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo} from 'react';
 import {Grid, Card, CardMedia, CardContent, Typography, Box, IconButton, AppBar, Toolbar, TextField} from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import Collapse from "@mui/material/Collapse";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+
+// generate dates based on todays date and a user defined range.
+const generateDateRange = (range) => {
+	const dates = [];
+	const today = new Date();
+
+	for (let i = -range; i <= range; i++) {
+		const d = new Date();
+		d.setDate(today.getDate() + i);
+
+		const formatted = d.toISOString().split("T")[0]; // YYYY-MM-DD
+		dates.push(formatted);
+	}
+
+	return dates;
+};
+
 
 
 const App = () => {
     const [gridData, setGridData] = useState([]);
-	const [prices, setPrices] = useState({});
-  	// const [itemID, setItemID] = React.useState('');
-	const [expanded, setExpanded] = useState({});
-
 	const [entryValue, setEntryValue] = useState('');
-	const [catalogData, setCatalogData] = useState([]); // for the catalog scrollable window
-	const [showCatalog, setShowCatalog] = useState(false);
+	const [range, setRange] = useState(7); // how many days before and after todays date should be selectable? default to 7
+	// selected date (default = today)
+	const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
 
 	let link = 'http://127.0.0.1:5000/api'
 
-	const handleToggleExpand = (id) => {
-		setExpanded(prev => ({
-			...prev,
-			[id]: !prev[id]
-		}));
-	};
 
+	// populating the grid
 	const getAll = React.useCallback(async () => {
 		let path = '/view/';
 		let url = link + path;
@@ -47,13 +53,15 @@ const App = () => {
 		}
 	}, [link]);
 
+
 	const createEntry = async () => {
 		let path = '/create/';
 		let url = link + path;
 
 		const payload = {
 			// username: 'johndoe',
-			description: entryValue
+			description: entryValue,
+			date: selectedDate
 		};
 		try {
 			// send the value in the text field (entryValue) to the server
@@ -84,21 +92,11 @@ const App = () => {
 		}
 	};
 
-	const handleItemClick = async (id) => {
-		try {
-			// console.log(response);
-
-			// setItemID('');
-			// getAll();
-		} 
-		catch (err) {
-			console.error(err);
-		}
-	};
-
-	// functions to call right when the app start.
+	// functions called right when the app starts.
 	useEffect(() => {getAll();}, [getAll]); // populate the list/grid
-
+	// recompute dates when the dropdown range value changes
+	const dates = useMemo(() => generateDateRange(range), [range]);
+	
   return (
     <div className="App">
 
@@ -122,7 +120,26 @@ const App = () => {
 			<IconButton onClick={getAll} sx={{backgroundColor: "secondary.main", color: "white", "&:hover": { backgroundColor: "secondary.dark" }}}>
 				<RefreshIcon />
 			</IconButton>
+
+			{/* recent date range selector */}
+			<select value={range} onChange={(e) => setRange(Number(e.target.value))}>
+				{[3, 7, 14].map((r) => (
+				<option key={r} value={r}>
+					±{r} days
+				</option>
+				))}
+			</select>
+
+			{/* date selection dropdown */}
+			<select value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)}>
+				{dates.map((date) => (
+				<option key={date} value={date}>
+					{date}
+				</option>
+				))}
+			</select>
 			
+			{/* user input */}
 			<TextField 
 				id="outlined-controlled" 
 				
@@ -139,7 +156,6 @@ const App = () => {
 		</Box>
 
 
-
 		<Grid container spacing={2} mt={4} justifyContent={'center'}>
 		{gridData.map((item) => (
 			<Grid item xs={12} sm={6} md={4} key={item.id}>
@@ -150,7 +166,8 @@ const App = () => {
 					<CardContent>
 						<Box display="flex" justifyContent="space-between" alignItems="center">
 							<Typography variant="h6">
-							{item.date}
+							{/* {item.date} */}
+							{new Date(item.date).toDateString()}
 							</Typography>
 						</Box>
 
@@ -164,6 +181,7 @@ const App = () => {
 			</Grid>
 		))}
 		</Grid>
+      
 
     </div>
   );

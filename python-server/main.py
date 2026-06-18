@@ -78,18 +78,20 @@ def get_all_items():
                    'id': item.id,
                     'icon':item.icon,
                     'date': item.created_at,
-                    'entry_date':item.entry_date,
+                    # 'entry_date':item.entry_date,
                     'description': item.description
-                    } for item in items]
+                    } for item in items],
+        'date': datetime.date.today() # extra info for frontend to know the date from the server.
     }), 200
 
 # Create an entry in the database
 @app.route('/api/create/', methods=['POST'])
 def create_outfit():
     print('create_outfit')
-    # see if an entry has been created for today
-    isEntryToday = lookupTodayEntry(Outfit)
-    isEntryToday = False
+    # see if an entry has been created for the given date from the user.
+    # if the entry already exists, should be updated with the new version
+    # isEntryToday = lookupTodayEntry(Outfit)
+    # isEntryToday = False
 
     data = request.get_json() # data sent from the user frontend
     print(data)
@@ -97,16 +99,22 @@ def create_outfit():
     if not data:
         return jsonify({"error": "Missing JSON payload"}), 400
         
-    usersDesc = data.get("description")
+    usersDesc = data.get("description") # get user description from payload
+    userDate = data.get("date") # get user date from payload
+    userDateAsDT = datetime.datetime.fromisoformat(userDate)
+    # convert the string given by user (in iso format) to a python datetime object
 
     # if it is not in the database we need to add it.
     if not isEntryToday:
         print(f'date time today {datetime.date.today()}')
+        print(f'date time payload {userDate} {type(userDate)}')
+        print(f'date time converted {userDateAsDT}')
       # add to database
         entry = Outfit(name='User',
                         description=usersDesc,
                         icon='https://images.unsplash.com/vector-1775556825284-3b697bc284bf?q=80&w=1480&auto=format&fit=crop&ixlib=rb-4.1.0',
-                        entry_date=datetime.date.today()
+                        entry_date=userDateAsDT,
+                        created_at=userDateAsDT
                        )
         db.session.add(entry)
         db.session.commit()
