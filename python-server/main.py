@@ -25,44 +25,6 @@ def base_page():
         'success': True,
     }), 200
 
-# populate database for missing days in the database
-@app.route('/api/populate/', methods=['POST'])
-def populate_db():
-    print('populate db')
-    # see if an entry has been created for today
-    # isEntryToday = lookupTodayEntry(Outfit)
-
-    data = request.get_json() # data sent from the user frontend
-    print(data)
-    
-    if not data:
-        return jsonify({"error": "Missing JSON payload"}), 400
-        
-    usersDesc = data.get("description")
-
-    # if it is not in the database we need to add it.
-    # add to database
-    entry = Outfit(description=usersDesc,
-                    icon='https://images.unsplash.com/vector-1775556825284-3b697bc284bf?q=80&w=1480&auto=format&fit=crop&ixlib=rb-4.1.0',
-                    # date.
-                    )
-    db.session.add(entry)
-    db.session.commit()
-    print('cannot add outfit for a day that already exists')
-
-    # user_data = {
-    #     "id": Outfit.id,
-    #     "name": Outfit.name,
-    #     "description": Outfit.description,
-    #     "time-created": Outfit.created_at,
-    #     "icon": Outfit.icon
-    # }
-
-    return jsonify({
-        'success': True,
-        'item': usersDesc
-    }), 200
-
 # Get all entries
 @app.route('/api/view/', methods=['GET'])
 def get_all_items():
@@ -91,10 +53,10 @@ def get_all_items():
 @app.route('/api/create/', methods=['POST'])
 def create_outfit():
     print('create_outfit')
-    # see if an entry has been created for the given date from the user.
-    # if the entry already exists, should be updated with the new version
-    # isEntryToday = lookupTodayEntry(Outfit)
-    isEntryToday = False
+
+    # 1. ensure the request is safe to read from,
+    # read the request, split up the values into variables here.
+    
 
     data = request.get_json() # data sent from the user frontend
     print(data)
@@ -106,13 +68,28 @@ def create_outfit():
     userDate = data.get("date") # get user date from payload
     userDateAsDT = datetime.datetime.fromisoformat(userDate)
     # convert the string given by user (in iso format) to a python datetime object
+    
+    # retrieve the entry if an entry has been created for the given date from the user.    
+    old_entry = Outfit.query.filter_by(created_at=userDateAsDT).first()
 
-    # if it is not in the database we need to add it.
-    if not isEntryToday:
+    # if the entry already exists, should be updated with the new version
+    if old_entry:
+        old_entry.description = usersDesc
+        db.session.commit()
+
+        # print(old_entry.id)
+        return jsonify({
+            'success': True,
+            'message': f'Updated entry description because an entry did exist for date {userDate}.'
+        }), 200
+
+
+    # if it is not in the database it can be added simply.
+    else:
         print(f'date time today {datetime.date.today()}')
         print(f'date time payload {userDate} {type(userDate)}')
         print(f'date time converted {userDateAsDT}')
-      # add to database
+        # add to database
         entry = Outfit(name='User',
                         description=usersDesc,
                         icon='https://images.unsplash.com/vector-1775556825284-3b697bc284bf?q=80&w=1480&auto=format&fit=crop&ixlib=rb-4.1.0',
@@ -121,25 +98,19 @@ def create_outfit():
                        )
         db.session.add(entry)
         db.session.commit()
-    else:
-        # print('cannot add outfit for a day that already exists')
+
         return jsonify({
-        'success': False,
-        'message': 'Cannot add an outfit for a day that already exists.'
-    }), 403
+            'success': True,
+            'message': f'Created new entry because an entry did not exist for date {userDate}.'
+        }), 200
+    # else:
+    #     print('cannot add outfit for a day that already exists')
+    #     return jsonify({
+    #         'success': False,
+    #         'message': 'Cannot add an outfit for a day that already exists.'
+    #     }), 403
 
-    # user_data = {
-    #     "id": Outfit.id,
-    #     "name": Outfit.name,
-    #     "description": Outfit.description,
-    #     "time-created": Outfit.created_at,
-    #     "icon": Outfit.icon
-    # }
 
-    return jsonify({
-        'success': True,
-        'item': usersDesc
-    }), 200
 
 @app.route('/api/item/<int:item_id>', methods=['DELETE'])
 def delete_entry(item_id):
