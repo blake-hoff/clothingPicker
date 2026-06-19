@@ -66,6 +66,41 @@ const App = () => {
 	}, [link]);
 
 
+	const handleDeleteItem = async (id) => {
+		// also get the price history
+		try {
+			const outputDelete = await deleteItem(id);
+			console.log(outputDelete)
+			getAll(); // update grid after deletion.
+		}
+		catch (err) {
+			console.error(err);
+		}
+	};
+
+	// delete one item of id
+	async function deleteItem(id) {
+		// console.log(id);
+		let path = '/item/' + id
+		let url = link + path
+		console.log(url)
+
+		try{
+			const response = await fetch(url, {method: "DELETE"});
+			const text = await response.text();
+			const cleanText = text.replace(/:NaN/g, ':null');
+			const newData = JSON.parse(cleanText);
+
+			console.log(newData)
+			// return newData.item
+        }
+		catch (err) {
+			console.log("Something went wrong!", err);
+			alert(err);
+			return null;
+		}
+	}
+
 	const createEntry = async () => {
 		let path = '/create/';
 		let url = link + path;
@@ -204,6 +239,10 @@ const App = () => {
 							<Typography variant="body1" mt={1} sx={{wordBreak: "break-word", overflowWrap: "anywhere", whiteSpace: "normal"}}>
 								Outfit Description: {item.description}
 							</Typography>
+
+							<Button variant="outlined" color="error" size="small" onClick={() => handleDeleteItem(item.id)}>
+								Delete Item
+							</Button>
 						</Box>
 					</CardContent>
 				</Card>

@@ -1,10 +1,13 @@
 import datetime
 
+import logging
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from database import db, Outfit
 import requests
 from functions import *
+
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)  # Enables CORS to allow requests from the React frontend
@@ -138,6 +141,28 @@ def create_outfit():
         'item': usersDesc
     }), 200
 
+@app.route('/api/item/<int:item_id>', methods=['DELETE'])
+def delete_entry(item_id):
+    # see if it is in the backends database already.
+    outfitEntry = Outfit.query.filter_by(id=item_id).first()
+
+    # if it is not in the database, return client side error.
+    if not outfitEntry:
+        return jsonify({
+            'success': False,
+            'error': f'Item with id \"{item_id}\" not found'
+        }), 404
+    
+    # use a try statement for a database operation that could fail.
+    try:
+        # attempt to delete the entry in the database 
+        db.session.delete(outfitEntry)
+        db.session.commit()
+
+        return jsonify({'success': True,}), 200 # if the code got here, it means that the entry has been successfully deleted
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Could not delete item {item_id}: {str(e)}") # log error
 
 # For direct execution
 if __name__ == '__main__':
