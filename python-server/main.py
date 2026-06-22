@@ -1,4 +1,4 @@
-import datetime
+from datetime import date, datetime
 
 import logging
 from flask import Flask, jsonify, request
@@ -46,7 +46,7 @@ def get_all_items():
                     # 'entry_date':item.entry_date,
                     'description': item.description
                     } for item in items],
-        'date': datetime.date.today() # extra info for frontend to know the date from the server.
+        'date': date.today() # extra info for frontend to know the date from the server.
     }), 200
 
 # Create an entry in the database
@@ -66,7 +66,7 @@ def create_outfit():
         
     usersDesc = data.get("description") # get user description from payload
     userDate = data.get("date") # get user date from payload
-    userDateAsDT = datetime.datetime.fromisoformat(userDate)
+    userDateAsDT = datetime.fromisoformat(userDate)
     # convert the string given by user (in iso format) to a python datetime object
     
     # retrieve the entry if an entry has been created for the given date from the user.    
@@ -86,7 +86,7 @@ def create_outfit():
 
     # if it is not in the database it can be added simply.
     else:
-        print(f'date time today {datetime.date.today()}')
+        print(f'date time today {date.today()}')
         print(f'date time payload {userDate} {type(userDate)}')
         print(f'date time converted {userDateAsDT}')
         # add to database
