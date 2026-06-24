@@ -43,6 +43,19 @@ const App = () => {
 	// selected date (default = today)
 	const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
 
+	useEffect(() => {
+    	const existingEntry = gridData.find(item => {
+			try{
+				const getServerDate = new Date(item.date).toISOString().split("T")[0];
+				return getServerDate === selectedDate;
+			}catch{
+				return false;
+			}
+		});
+    
+    	setEntryValue(existingEntry ? existingEntry.description : '');
+	}, [selectedDate, gridData]);
+
 	let link = 'http://127.0.0.1:5000/api'
 
 
