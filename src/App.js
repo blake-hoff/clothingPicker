@@ -80,7 +80,6 @@ const App = () => {
 
 
 	const handleDeleteItem = async (id) => {
-		// also get the price history
 		try {
 			const outputDelete = await deleteItem(id);
 			console.log(outputDelete)
@@ -113,6 +112,24 @@ const App = () => {
 			return null;
 		}
 	}
+
+	const handleEditItem = async (item_date) => {
+		try {
+
+			// update the selectedDate
+			// which will automatically notice that the description is different.
+
+			// console.log(item_date);
+			setRange(10000);
+			const stringDate = new Date(item_date).toISOString().split("T")[0];
+			setSelectedDate(stringDate);
+
+			// getAll();
+		}
+		catch (err) {
+			console.error(err);
+		}
+	};
 
 	const createEntry = async () => {
 		let path = '/create/';
@@ -198,6 +215,11 @@ const App = () => {
 				</option>
 				))}
 			</select>
+			{/* <DatePicker
+				label="Controlled picker"
+				value={selectedDate}
+				onChange={(newValue) => setSelectedDate(newValue)}
+			/> */}
 			
 			{/* user input */}
 			<TextField 
@@ -253,9 +275,16 @@ const App = () => {
 								Outfit Description: {item.description}
 							</Typography>
 
-							<Button variant="outlined" color="error" size="small" onClick={() => handleDeleteItem(item.id)}>
-								Delete Item
-							</Button>
+							<Box sx={{ display: "flex", gap: 2, mt: 2, justifyContent: "center" }}>
+								<Button variant="outlined" color="info" size="small" onClick={() => handleEditItem(item.date)}>
+									Edit Item
+								</Button>
+
+								<Button variant="outlined" color="error" size="small" onClick={() => handleDeleteItem(item.id)}>
+									Delete Item
+								</Button>
+							</Box>
+
 						</Box>
 					</CardContent>
 				</Card>
