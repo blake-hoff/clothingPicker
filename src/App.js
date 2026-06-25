@@ -6,21 +6,11 @@ import { useState, useEffect, useMemo} from 'react';
 import {Grid, Card, CardMedia, CardContent, Typography, Box, IconButton, AppBar, Toolbar, TextField} from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 
-// generate dates based on todays date and a user defined range.
-const generateDateRange = (range) => {
-	const dates = [];
-	const today = new Date();
-
-	for (let i = -range; i <= range; i++) {
-		const d = new Date();
-		d.setDate(today.getDate() + i);
-
-		const formatted = d.toISOString().split("T")[0]; // YYYY-MM-DD
-		dates.push(formatted);
-	}
-
-	return dates;
-};
+// for the calendar date selection
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
 
 // convert a datetime object from the server to a more readable format for the frontend.
 const formatDate = (dateStr) => {
@@ -39,15 +29,14 @@ const formatDate = (dateStr) => {
 const App = () => {
     const [gridData, setGridData] = useState([]);
 	const [entryValue, setEntryValue] = useState('');
-	const [range, setRange] = useState(7); // how many days before and after todays date should be selectable? default to 7
 	// selected date (default = today)
-	const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
+	const [selectedDate, setSelectedDate] = useState(dayjs());
 
 	useEffect(() => {
     	const existingEntry = gridData.find(item => {
 			try{
-				const getServerDate = new Date(item.date).toISOString().split("T")[0];
-				return getServerDate === selectedDate;
+				const getServerDate = new Date(item.date).toISOString().split("T")[0]; // the server date has been formatted to a string.
+				return getServerDate === selectedDate.format("YYYY-MM-DD"); // selectedDate is in datejs format, needs to be back to a string.
 			}catch{
 				return false;
 			}
@@ -83,7 +72,7 @@ const App = () => {
 		try {
 			const outputDelete = await deleteItem(id);
 			console.log(outputDelete)
-			getAll(); // update grid after deletion.
+			getAll(); // retrieve the updated grid after deletion.
 		}
 		catch (err) {
 			console.error(err);
@@ -116,13 +105,11 @@ const App = () => {
 	const handleEditItem = async (item_date) => {
 		try {
 
-			// update the selectedDate
-			// which will automatically notice that the description is different.
+			// update the selectedDate, which will automatically notice that the description is different.
 
 			// console.log(item_date);
-			setRange(10000);
 			const stringDate = new Date(item_date).toISOString().split("T")[0];
-			setSelectedDate(stringDate);
+			setSelectedDate(dayjs(stringDate)); // the calendar component needs the date to be in datejs format
 
 			// getAll();
 		}
@@ -138,7 +125,7 @@ const App = () => {
 		const payload = {
 			// username: 'johndoe',
 			description: entryValue,
-			date: selectedDate
+			date: selectedDate.format('YYYY-MM-DD') // format the date in a simple string for the server.
 		};
 		try {
 			// send the value in the text field (entryValue) to the server
@@ -159,9 +146,6 @@ const App = () => {
 			const responseData = await response.json(); // Parses returning JSON string to object
 			console.log('Success:', responseData);
 
-			// setEntryValue(''); // clear the text field
-
-			// setShowCatalog(true);
 			getAll();
 		} 
 		catch (err) {
@@ -171,8 +155,6 @@ const App = () => {
 
 	// functions called right when the app starts.
 	useEffect(() => {getAll();}, [getAll]); // populate the list/grid
-	// recompute dates when the dropdown range value changes
-	const dates = useMemo(() => generateDateRange(range), [range]);
 	
   return (
     <div className="App">
@@ -197,29 +179,38 @@ const App = () => {
 			<IconButton onClick={getAll} sx={{backgroundColor: "secondary.main", color: "white", "&:hover": { backgroundColor: "secondary.dark" }}}>
 				<RefreshIcon />
 			</IconButton>
+			
+			{/* calendar date selection */}
+			<LocalizationProvider dateAdapter={AdapterDayjs}>
+				<Box sx={{ display: 'flex', justifyContent: 'center', 
+					"& .MuiOutlinedInput-root": 
+					{color: "#afc8fb","& fieldset": {borderColor: "#4f86f8",},
 
-			{/* recent date range selector */}
-			<select value={range} onChange={(e) => setRange(Number(e.target.value))}>
-				{[3, 7, 14].map((r) => (
-				<option key={r} value={r}>
-					±{r} days
-				</option>
-				))}
-			</select>
+					"&:hover fieldset": {
+					borderColor: "#afc8fb", 
+					borderWidth: "3px",
+					},
+					},
 
-			{/* date selection dropdown */}
-			<select value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)}>
-				{dates.map((date) => (
-				<option key={date} value={date}>
-					{date}
-				</option>
-				))}
-			</select>
-			{/* <DatePicker
-				label="Controlled picker"
-				value={selectedDate}
-				onChange={(newValue) => setSelectedDate(newValue)}
-			/> */}
+				"& .MuiInputLabel-root": {
+					color: "#afc8fb",
+				},
+				}}>
+			
+				<DatePicker
+					label="Select Outfit Date"
+					value={selectedDate}
+					onChange={(newDate) => setSelectedDate(dayjs(newDate))}
+					slotProps={{ 
+						textField: { 
+						size: 'small',
+						fullWidth: true // match input width to container
+						} 
+					}} 
+				/>
+
+				</Box>
+			</LocalizationProvider>
 			
 			{/* user input */}
 			<TextField 
@@ -231,11 +222,12 @@ const App = () => {
 
 					"&:hover fieldset": {
 					borderColor: "#afc8fb", 
+					borderWidth: "3px",
 					},
 
 					"&.Mui-focused fieldset": {
 					borderColor: "#4f86f8",
-					borderWidth: "2px",
+					borderWidth: "4px",
 					},
 				},
 
