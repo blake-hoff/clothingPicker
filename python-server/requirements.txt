@@ -9,3 +9,5 @@ requests
 flask_sqlalchemy
 
 sqlalchemy
+
+Flask-Migrate

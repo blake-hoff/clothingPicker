@@ -6,6 +6,7 @@ from flask_cors import CORS
 from database import db, Outfit
 import requests
 from functions import *
+from flask_migrate import Migrate
 
 logger = logging.getLogger(__name__)
 
@@ -16,6 +17,8 @@ CORS(app, supports_credentials=True)  # Enables CORS to allow requests from the 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
+
+migrate = Migrate(app, db)
 
 # Class Routes
 #base page
@@ -93,7 +96,6 @@ def create_outfit():
         entry = Outfit(name='User',
                         description=usersDesc,
                         icon='https://images.unsplash.com/vector-1775556825284-3b697bc284bf?q=80&w=1480&auto=format&fit=crop&ixlib=rb-4.1.0',
-                        entry_date=userDateAsDT,
                         created_at=userDateAsDT
                        )
         db.session.add(entry)
