@@ -1,5 +1,9 @@
 from datetime import date, datetime
 
+def get_user_identity():
+    return 1
+
+
 def ensureTwoDigits(inputDigit):
     digit_as_string = f'{inputDigit}'
     if(len(digit_as_string) == 1):

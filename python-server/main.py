@@ -1,12 +1,15 @@
 from datetime import date, datetime
 
 import logging
+import requests
+
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from database import db, Outfit
-import requests
-from functions import *
 from flask_migrate import Migrate
+
+from database import db, Outfit
+from functions import *
+
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +35,8 @@ def base_page():
 @app.route('/api/view/', methods=['GET'])
 def get_all_items():
     # Get all entries in the database
-    items = Outfit.query.order_by(Outfit.created_at.desc())
+    items = Outfit.query.filter_by(user_id=get_user_identity()).order_by(Outfit.created_at.desc())
+    # need to filter by the user id based on the users credentials later on.
     # print(items)
 
     #this can use flask login which is not set up yet.
@@ -46,7 +50,6 @@ def get_all_items():
                    'id': item.id,
                     'icon':item.icon,
                     'date': item.created_at,
-                    # 'entry_date':item.entry_date,
                     'description': item.description
                     } for item in items],
         'date': date.today() # extra info for frontend to know the date from the server.
@@ -93,10 +96,10 @@ def create_outfit():
         print(f'date time payload {userDate} {type(userDate)}')
         print(f'date time converted {userDateAsDT}')
         # add to database
-        entry = Outfit(name='User',
-                        description=usersDesc,
+        entry = Outfit(description=usersDesc,
                         icon='https://images.unsplash.com/vector-1775556825284-3b697bc284bf?q=80&w=1480&auto=format&fit=crop&ixlib=rb-4.1.0',
-                        created_at=userDateAsDT
+                        created_at=userDateAsDT,
+                        user_id=1
                        )
         db.session.add(entry)
         db.session.commit()
@@ -105,12 +108,6 @@ def create_outfit():
             'success': True,
             'message': f'Created new entry because an entry did not exist for date {userDate}.'
         }), 200
-    # else:
-    #     print('cannot add outfit for a day that already exists')
-    #     return jsonify({
-    #         'success': False,
-    #         'message': 'Cannot add an outfit for a day that already exists.'
-    #     }), 403
 
 
 
