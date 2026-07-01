@@ -2,8 +2,8 @@ import './App.css';
 import * as React from 'react';
 
 import Button from '@mui/material/Button';
-import { useState, useEffect, useMemo} from 'react';
-import {Grid, Card, CardMedia, CardContent, Typography, Box, IconButton, AppBar, Toolbar, TextField} from '@mui/material';
+import { useState, useEffect } from 'react';
+import {Grid, Card, CardMedia, CardContent, Typography, Box, IconButton, TextField} from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 
 // for the calendar date selection
@@ -11,6 +11,9 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
+
+// components
+import NavigationBar from './components/NavigationBar';
 
 // convert a datetime object from the server to a more readable format for the frontend.
 const formatDate = (dateStr) => {
@@ -158,21 +161,7 @@ const App = () => {
 	
   return (
     <div className="App">
-
-		<AppBar position="static" sx={{bgcolor: '#00ff66'}}>
-		<Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-			<Box display="flex" alignItems="center" gap={2}>
-				<img src="https://images.unsplash.com/vector-1775556825284-3b697bc284bf?q=80&w=1480&auto=format&fit=crop&ixlib=rb-4.1.0" 
-					alt="clotrack" 
-					style={{ height: 35 }}
-				/>
-				<Typography variant="h6" fontWeight="bold" sx={{color: '#4f86f8'}}>
-					CloTrack
-				</Typography>
-
-			</Box>
-		</Toolbar>
-		</AppBar>
+		<NavigationBar title="CloTrack" />
 
 		<Box sx={{display: "flex", alignItems: "center", gap: 2, padding: 2, borderBottom: "1px solid rgba(255,255,255,0.2)"}}>
 			{/* refresh button */}
