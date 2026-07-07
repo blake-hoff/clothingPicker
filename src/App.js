@@ -159,21 +159,28 @@ const App = () => {
     <div className="App">
 		<NavigationBar title="CloTrack" />
 
-		<ActionBar 
-		getAll={getAll}
-		selectedDate={selectedDate}
-		setSelectedDate={setSelectedDate}
-		entryValue={entryValue}
-		setEntryValue={setEntryValue}
-		createEntry={createEntry}
-		/>
+		<div>
+			<ActionBar 
+			getAll={getAll}
+			selectedDate={selectedDate}
+			setSelectedDate={setSelectedDate}
+			entryValue={entryValue}
+			setEntryValue={setEntryValue}
+			createEntry={createEntry}
+			/>
+		</div>
 
-		<ItemGrid
-		gridData={gridData}
-		formatDate={formatDate}
-		handleEditItem={handleEditItem}
-		handleDeleteItem={handleDeleteItem}
-		/>
+
+
+		<div>
+			<ItemGrid
+			gridData={gridData}
+			formatDate={formatDate}
+			handleEditItem={handleEditItem}
+			handleDeleteItem={handleDeleteItem}
+			/>
+		</div>
+			
 		
     </div>
   );

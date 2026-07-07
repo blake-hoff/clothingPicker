@@ -3,6 +3,7 @@ import * as React from 'react';
 import Button from '@mui/material/Button';
 import {Box, IconButton, TextField} from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import AddBoxIcon from '@mui/icons-material/AddBox';
 
 // for the calendar date selection
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -18,7 +19,7 @@ function ActionBar({
     setEntryValue,
     createEntry}) {
     return (
-		<Box sx={{display: "flex", alignItems: "center", gap: 2, padding: 2, borderBottom: "1px solid rgba(255,255,255,0.2)"}}>
+		<Box sx={{position: "static", width: "100%", display: "flex", alignItems: "center", gap: 2, padding: 2, borderBottom: "5px solid rgba(255,255,255,0.2)"}}>
 			{/* refresh button */}
 			<IconButton onClick={getAll} sx={{backgroundColor: "secondary.main", color: "white", "&:hover": { backgroundColor: "secondary.dark" }}}>
 				<RefreshIcon />
@@ -86,7 +87,9 @@ function ActionBar({
 			/>
 
 			{/* search catalog*/}
-			<Button onClick={() => createEntry()} variant="outlined">Create</Button>
+			<Button onClick={() => createEntry()} variant="contained">
+				<AddBoxIcon />
+			</Button>
 
 
 		</Box>

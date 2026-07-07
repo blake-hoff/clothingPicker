@@ -1,6 +1,15 @@
 .App {
   text-align: center;
   background-color: #372929;
+  min-height: 100vh; /* prevents the page from having no background if the server is not running */
+  overflow-x: hidden;       
+  overflow-y: auto;  
+}
+
+html, body {
+  overscroll-behavior: none; /* Prevents the elastic bounce effect on all sides */
+  /* overflow-x: hidden;        Fixes the white space/horizontal scroll bug */
+
 }
 
 .App-logo {
