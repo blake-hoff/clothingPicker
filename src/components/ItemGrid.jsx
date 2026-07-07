@@ -12,7 +12,11 @@ function ItemGrid({
     handleDeleteItem
     }) {
     return (
-    <Grid container spacing={2} mt={4} justifyContent={'center'} sx={{px: 2}}>
+    <Box sx={{ width: '99vw'}}>
+    <Grid container spacing={2} mt={4} justifyContent={'center'} 
+        className="item-grid"
+        sx={{px: 4, pr: 4, maxHeight:'calc(80vh - 64px)', overflowY:'auto', alignContent:'flex-start'}}
+        >
             {gridData.map((item) => (
                 <Grid item xs={12} sm={12} md={12} key={item.id} sx={{minWidth:0, width:"100%"}}>
                     <Card
@@ -52,6 +56,7 @@ function ItemGrid({
                 </Grid>
             ))}
             </Grid>
+        </Box>
     );
 }
 
