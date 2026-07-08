@@ -7,8 +7,9 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_migrate import Migrate
 
-from database import db, Outfit
+from database import db, Outfit, User
 from functions import *
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
 logger = logging.getLogger(__name__)
@@ -99,7 +100,7 @@ def create_outfit():
         entry = Outfit(description=usersDesc,
                         icon='https://images.unsplash.com/vector-1775556825284-3b697bc284bf?q=80&w=1480&auto=format&fit=crop&ixlib=rb-4.1.0',
                         created_at=userDateAsDT,
-                        user_id=1
+                        user_id=get_user_identity()
                        )
         db.session.add(entry)
         db.session.commit()
@@ -133,6 +134,71 @@ def delete_entry(item_id):
     except Exception as e:
         db.session.rollback()
         logger.error(f"Could not delete item {item_id}: {str(e)}") # log error
+
+@app.route('/api/auth/signup/', methods=['POST'])
+def sign_up():
+    print('sign_up')
+
+    # 1. ensure the request is safe to read from,
+    # read the request, split up the values into variables here.
+    
+
+    data = request.get_json() # data sent from the user frontend
+    print(data)
+    
+    if not data:
+        return jsonify({"error": "Missing JSON payload"}), 400
+
+    
+    userName = data.get("username")
+    userEmail = data.get("email") # get user email from payload
+    userPassword = data.get("password") # get user password from payload
+    print(userName, userEmail, userPassword)
+    invalidParameters, parametersMessage = invalidUserParamaters(userName, userEmail, userPassword)
+    if(invalidParameters):
+        return jsonify({
+            'success': False,
+            'message': f'The parameters used are invalid.',
+            'error': parametersMessage
+        }), 400
+
+    # retrieve the entry if an entry has been created for the chosen username from the user.
+    username_db = User.query.filter_by(username=userName).first() 
+    email_db = User.query.filter_by(email=userEmail).first()
+    # user could not reuse an username or email
+
+    # if the username already exists, should not create an account. need to send an error message.
+    if username_db:
+        db.session.delete(username_db)
+        db.session.commit()
+        return jsonify({
+            'success': False,
+            'error': f'The username \'{userName}\' is taken.'
+        }), 400
+    
+    if email_db:
+        return jsonify({
+            'success': False,
+            'error': f'The email \'{userEmail}\' is taken.'
+        }), 400
+
+
+    # if the username is not in the database it can be added.
+    else:
+        passwordHash = generate_password_hash(userPassword) # generate the password hash for use in the database. 
+        # add to database
+        new_user = User(username=userName,
+                    email=userEmail,
+                    password_hash=passwordHash
+                    )
+        db.session.add(new_user)
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': f'Created new user because an account with the username \'{userName}\' did not exist yet.'
+        }), 200
+
 
 # For direct execution
 if __name__ == '__main__':

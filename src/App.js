@@ -10,6 +10,8 @@ import dayjs from 'dayjs';
 import NavigationBar from './components/NavigationBar';
 import ActionBar from './components/ActionBar';
 import ItemGrid from './components/ItemGrid';
+import LoginPage from './components/LoginPage';
+
 
 // convert a datetime object from the server to a more readable format for the frontend.
 const formatDate = (dateStr) => {
@@ -24,12 +26,12 @@ const formatDate = (dateStr) => {
   });
 };
 
-
 const App = () => {
     const [gridData, setGridData] = useState([]);
 	const [entryValue, setEntryValue] = useState('');
 	// selected date (default = today)
 	const [selectedDate, setSelectedDate] = useState(dayjs());
+	const [loggedIn, setLoggedIn] = useState(0);
 
 	useEffect(() => {
     	const existingEntry = gridData.find(item => {
@@ -152,14 +154,59 @@ const App = () => {
 		}
 	};
 
+	const handleSignUp = async (username, email, password) => {
+		let path = '/auth/signup/';
+		let url = link + path;
+
+		console.log(username, email, password)
+
+		const payload = {
+			username: username,
+			email: email,
+			password: password,
+		};
+		try {
+			// send the value in the text field (entryValue) to the server
+			const response = await fetch(url, {
+				// method: 'POST',
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json', // Tells server to expect JSON
+					'Accept': 'application/json'        // Tells server client expects JSON back
+				},
+				body: JSON.stringify(payload)          // Converts object into a valid JSON string
+			});
+
+			if (!response.ok) {
+				const responseData = await response.json();
+				throw new Error(`HTTP error! Status: ${response.status} Message: ${responseData.error}`);
+
+			}
+
+			const responseData = await response.json(); // Parses returning JSON string to object
+			console.log('Success:', responseData);
+		} 
+		catch (err) {
+			console.error(err);
+		}
+	};
+
 	// functions called right when the app starts.
 	useEffect(() => {getAll();}, [getAll]); // populate the list/grid
 	
   return (
     <div className="App">
-		<NavigationBar title="CloTrack" />
-
+		
 		<div>
+			<NavigationBar title="CloTrack" setLoggedIn={setLoggedIn} loggedIn={loggedIn} />
+
+		</div>
+
+		{loggedIn === 0 && <div>
+			<LoginPage handleSignUp={handleSignUp}/>
+			</div>}
+
+		{loggedIn === 1 && <div>
 			<ActionBar 
 			getAll={getAll}
 			selectedDate={selectedDate}
@@ -168,19 +215,17 @@ const App = () => {
 			setEntryValue={setEntryValue}
 			createEntry={createEntry}
 			/>
-		</div>
 
 
 
-		<div>
+
 			<ItemGrid
 			gridData={gridData}
 			formatDate={formatDate}
 			handleEditItem={handleEditItem}
 			handleDeleteItem={handleDeleteItem}
 			/>
-		</div>
-			
+		</div>}
 		
     </div>
   );

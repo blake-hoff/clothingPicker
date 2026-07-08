@@ -1,9 +1,11 @@
 import * as React from 'react';
 
 import {Typography, Box, AppBar, Toolbar} from '@mui/material';
+// misc buttons
+import { IconButton } from '@mui/material';
+import AddBoxIcon from '@mui/icons-material/AddBox';
 
-
-function NavigationBar({title}) {
+function NavigationBar({title, loggedIn, setLoggedIn}) {
     return (
         <AppBar position="static" sx={{bgcolor: '#00ff66'}}>
 			<Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
@@ -15,6 +17,10 @@ function NavigationBar({title}) {
 					<Typography variant="h6" fontWeight="bold" sx={{color: '#4f86f8'}}>
 						{title}
 					</Typography>
+
+					<IconButton onClick={() => setLoggedIn(prev => prev === 1 ? 0 : 1)} variant="contained" color="primary">
+						{loggedIn ? "Logged In" : "Logged Out"}
+					</IconButton>
 
 				</Box>
 			</Toolbar>

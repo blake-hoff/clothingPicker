@@ -3,6 +3,20 @@ from datetime import date, datetime
 def get_user_identity():
     return 1
 
+def invalidUserParamaters(username, email, password):
+    try: # these criteria must be met. if they are not met, an error will occur, jumping to the except block.
+        assert isinstance(username, str), "The username is not a string"
+        assert len(username) > 3, "The username is not long enough"
+        assert username.isalnum(), "Username must be alphanumeric"
+        # assert '' not in username, "The username contains invalid characters"
+        assert '@' in email, "There is no @ symbol in the email"
+        assert '.' in email, "There is no period in the email"
+        assert len(password) > 10, "Password is not at least 10 characters"
+    except AssertionError as e:
+        return True, str(e)
+    
+    return False, 'Valid user parameters'
+
 
 def ensureTwoDigits(inputDigit):
     digit_as_string = f'{inputDigit}'

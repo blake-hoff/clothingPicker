@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import Button from '@mui/material/Button';
+import { Button, IconButton } from '@mui/material';
 import {Grid, Card, CardContent, Typography, Box} from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
@@ -18,7 +18,7 @@ function ItemGrid({
         sx={{px: 4, pr: 4, maxHeight:'calc(80vh - 64px)', overflowY:'auto', alignContent:'flex-start'}}
         >
             {gridData.map((item) => (
-                <Grid item xs={12} sm={12} md={12} key={item.id} sx={{minWidth:0, width:"100%"}}>
+                <Grid item key={item.id} sx={{minWidth:0, width:"100%"}}>
                     <Card
                     sx={{backgroundColor: "#3e4132", color: "white", width: "90%", mx: "auto", overflow: "hidden", height: "auto"}}>
                         <CardContent>
@@ -37,15 +37,15 @@ function ItemGrid({
                                 </Typography>
                             </Grid>
                             
-                            <Grid item sx={{ width: "10%", justifyContent: "flex-end"}}>
-                                <Box sx={{ display: "flex", gap: 2, mt: 1, justifyContent: "flex-start" }}>
-                                    <Button variant="contained" color="info" size="small" onClick={() => handleEditItem(item.date)}>
+                            <Grid item sx={{ width: "8%", justifyContent: "flex-end"}}>
+                                <Box sx={{ display: "flex", gap: 0, mt: 1, justifyContent: "flex-start", backgroundColor: '#3e4132',   borderRadius: '10px'}}>
+                                    <IconButton variant="contained" color="info" size="small" onClick={() => handleEditItem(item.date)}>
                                         <EditIcon/>
-                                    </Button>
+                                    </IconButton>
 
-                                    <Button variant="contained" color="error" size="small" onClick={() => handleDeleteItem(item.id)}>
+                                    <IconButton variant="contained" color="error" size="small" onClick={() => handleDeleteItem(item.id)}>
                                         <DeleteIcon />
-                                    </Button>
+                                    </IconButton>
                                 </Box>
                             </Grid>
                         </Grid>

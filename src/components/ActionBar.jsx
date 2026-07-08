@@ -87,9 +87,9 @@ function ActionBar({
 			/>
 
 			{/* search catalog*/}
-			<Button onClick={() => createEntry()} variant="contained">
-				<AddBoxIcon />
-			</Button>
+			<IconButton onClick={() => createEntry()} variant="contained" color="primary" sx={{ padding: '16px' }}>
+				<AddBoxIcon sx={{ fontSize: 32 }}/>
+			</IconButton>
 
 
 		</Box>
