@@ -12,6 +12,8 @@ import ActionBar from './components/ActionBar';
 import ItemGrid from './components/ItemGrid';
 import LoginPage from './components/LoginPage';
 
+// site title passed into various components.
+const siteTitle = "CloTrack"
 
 // convert a datetime object from the server to a more readable format for the frontend.
 const formatDate = (dateStr) => {
@@ -168,7 +170,41 @@ const App = () => {
 		try {
 			// send the value in the text field (entryValue) to the server
 			const response = await fetch(url, {
-				// method: 'POST',
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json', // Tells server to expect JSON
+					'Accept': 'application/json'        // Tells server client expects JSON back
+				},
+				body: JSON.stringify(payload)          // Converts object into a valid JSON string
+			});
+
+			if (!response.ok) {
+				const responseData = await response.json();
+				throw new Error(`HTTP error! Status: ${response.status} Message: ${responseData.error}`);
+
+			}
+
+			const responseData = await response.json(); // Parses returning JSON string to object
+			console.log('Success:', responseData);
+		} 
+		catch (err) {
+			console.error(err);
+		}
+	};
+
+	const handleLogin = async (username, password) => {
+		let path = '/auth/login/';
+		let url = link + path;
+
+		console.log(username, password)
+
+		const payload = {
+			username: username,
+			password: password
+		};
+		try {
+			// send the value in the text field (entryValue) to the server
+			const response = await fetch(url, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json', // Tells server to expect JSON
@@ -198,12 +234,12 @@ const App = () => {
     <div className="App">
 		
 		<div>
-			<NavigationBar title="CloTrack" setLoggedIn={setLoggedIn} loggedIn={loggedIn} />
+			<NavigationBar title={siteTitle} setLoggedIn={setLoggedIn} loggedIn={loggedIn} />
 
 		</div>
 
 		{loggedIn === 0 && <div>
-			<LoginPage handleSignUp={handleSignUp}/>
+			<LoginPage title={siteTitle} handleSignUp={handleSignUp} handleLogin={handleLogin}/>
 			</div>}
 
 		{loggedIn === 1 && <div>

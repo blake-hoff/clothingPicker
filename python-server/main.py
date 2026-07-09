@@ -135,13 +135,15 @@ def delete_entry(item_id):
         db.session.rollback()
         logger.error(f"Could not delete item {item_id}: {str(e)}") # log error
 
+
+
 @app.route('/api/auth/signup/', methods=['POST'])
 def sign_up():
-    print('sign_up')
-
     # 1. ensure the request is safe to read from,
     # read the request, split up the values into variables here.
-    
+    # if the parameters are invalid, return corresponding error
+    # if the username or email exist, return corresponding error
+    # otherwise, make an account with the received user parameters
 
     data = request.get_json() # data sent from the user frontend
     print(data)
@@ -149,12 +151,12 @@ def sign_up():
     if not data:
         return jsonify({"error": "Missing JSON payload"}), 400
 
-    
     userName = data.get("username")
     userEmail = data.get("email") # get user email from payload
     userPassword = data.get("password") # get user password from payload
-    print(userName, userEmail, userPassword)
-    invalidParameters, parametersMessage = invalidUserParamaters(userName, userEmail, userPassword)
+    # print(userName, userEmail, userPassword)
+    
+    invalidParameters, parametersMessage = invalidUserParamaters(username=userName, email=userEmail, password=userPassword)
     if(invalidParameters):
         return jsonify({
             'success': False,
@@ -169,8 +171,6 @@ def sign_up():
 
     # if the username already exists, should not create an account. need to send an error message.
     if username_db:
-        db.session.delete(username_db)
-        db.session.commit()
         return jsonify({
             'success': False,
             'error': f'The username \'{userName}\' is taken.'
@@ -199,6 +199,64 @@ def sign_up():
             'message': f'Created new user because an account with the username \'{userName}\' did not exist yet.'
         }), 200
 
+
+
+@app.route('/api/auth/login/', methods=['POST'])
+def log_in():
+    # 1. ensure the request is safe to read from,
+    # read the request, split up the values into variables here.
+    # if the parameters are invalid, return corresponding error
+    # if the username exist, return corresponding error
+    # otherwise, make an account with the received user parameters
+
+    data = request.get_json() # data sent from the user frontend
+    print(data)
+    
+    if not data:
+        return jsonify({"error": "Missing JSON payload"}), 400
+
+    
+    userName = data.get("username")
+    # userEmail = data.get("email") # get user email from payload
+    userPassword = data.get("password") # get user password from payload
+    # print(userName, userPassword)
+
+    invalidParameters, parametersMessage = invalidUserParamaters(username=userName, password=userPassword)
+    if(invalidParameters):
+        return jsonify({
+            'success': False,
+            'message': f'The parameters used are invalid.',
+            'error': parametersMessage
+        }), 400
+
+    # retrieve the entry object if an entry has been created for the chosen username from the user.
+    username_db = User.query.filter_by(username=userName).first() 
+
+    # if the username exists, need to validate the password.
+    if username_db:
+        # used for changing the password.
+        # new_hash = generate_password_hash(userPassword)
+        # username_db.password_hash = new_hash
+        # db.session.commit()
+    
+        isValidPassword = check_password_hash(username_db.password_hash, userPassword)
+        if isValidPassword:
+            return jsonify({
+                'success': True,
+                'error': f'The account with username \'{userName}\' was found and password is correct.'
+            }), 200
+        else:
+            return jsonify({
+                'success': False,
+                'error': f'The username \'{userName}\' is taken and the password is incorrect.'
+            }), 400
+
+    # if the username is not in the database send error to the user.
+    else:
+        return jsonify({
+            'success': False,
+            'error': f'An account with the username \'{userName}\' does not exist.'
+        }), 400
 
 # For direct execution
 if __name__ == '__main__':

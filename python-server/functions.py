@@ -1,18 +1,20 @@
 from datetime import date, datetime
+from email_validator import validate_email, EmailNotValidError
 
 def get_user_identity():
     return 1
 
-def invalidUserParamaters(username, email, password):
+def invalidUserParamaters(username, password, email='name@email.net'):
+    # print(username, email, password)
     try: # these criteria must be met. if they are not met, an error will occur, jumping to the except block.
         assert isinstance(username, str), "The username is not a string"
-        assert len(username) > 3, "The username is not long enough"
+        assert len(username) >= 3, "Username must be at least 3 characters"
         assert username.isalnum(), "Username must be alphanumeric"
-        # assert '' not in username, "The username contains invalid characters"
-        assert '@' in email, "There is no @ symbol in the email"
-        assert '.' in email, "There is no period in the email"
-        assert len(password) > 10, "Password is not at least 10 characters"
+        assert validate_email(email, check_deliverability=False)
+        assert len(password) >= 10, "Password must be at least 10 characters"
     except AssertionError as e:
+        return True, str(e)
+    except EmailNotValidError as e:
         return True, str(e)
     
     return False, 'Valid user parameters'
