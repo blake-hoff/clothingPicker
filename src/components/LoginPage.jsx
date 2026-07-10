@@ -29,7 +29,7 @@ function LoginPage({title, handleSignUp, handleLogin}) {
         justifyContent="center" 
         alignItems="center" 
         minHeight="80vh" 
-        sx={{ bgcolor: '#f5f5f5', p: 3 }}
+        sx={{ bgcolor: '#372929', p: 3 }}
         >
 
         <Paper 
