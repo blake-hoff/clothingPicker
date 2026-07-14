@@ -5,3 +5,4 @@
 python-server/.idea
 python-server/__pycache__
 python-server/instance/database.db
+python-server/.env

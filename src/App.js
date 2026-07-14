@@ -12,8 +12,7 @@ import ActionBar from './components/ActionBar';
 import ItemGrid from './components/ItemGrid';
 import LoginPage from './components/LoginPage';
 
-// site title passed into various components.
-const siteTitle = "CloTrack"
+
 
 // convert a datetime object from the server to a more readable format for the frontend.
 const formatDate = (dateStr) => {
@@ -34,6 +33,10 @@ const App = () => {
 	// selected date (default = today)
 	const [selectedDate, setSelectedDate] = useState(dayjs());
 	const [loggedIn, setLoggedIn] = useState(0);
+	
+	// site title passed into various components.
+	const siteTitle = "CloTrack"
+	let link = 'http://localhost:5000/api'
 
 	useEffect(() => {
     	const existingEntry = gridData.find(item => {
@@ -48,8 +51,29 @@ const App = () => {
     	setEntryValue(existingEntry ? existingEntry.description : '');
 	}, [selectedDate, gridData]);
 
-	let link = 'http://127.0.0.1:5000/api'
 
+	// determine if the user has a session
+	const checkLogin = React.useCallback(async () => {
+	// async function checkLogin() {
+		let path = '/auth/user/';
+		let url = link + path;
+		
+		const response = await fetch(url, {credentials: "include"});
+
+		const data = await response.json();
+
+		console.log(data);
+
+		if(data.logged_in){
+			setLoggedIn(1);
+			getAll();
+			console.log("Logged in");
+		}
+		else{
+			setLoggedIn(0);
+			console.log("Not logged in");
+		}
+	}, [link]);
 
 	// populating the grid
 	const getAll = React.useCallback(async () => {
@@ -57,7 +81,7 @@ const App = () => {
 		let url = link + path;
 
 		try {
-			const response = await fetch(url);
+			const response = await fetch(url, {credentials: 'include'});
 			const text = await response.text();
 			const cleanText = text.replace(/:NaN/g, ':null');
 			const newData = JSON.parse(cleanText);
@@ -90,7 +114,7 @@ const App = () => {
 		console.log(url)
 
 		try{
-			const response = await fetch(url, {method: "DELETE"});
+			const response = await fetch(url, {method: "DELETE", credentials: 'include'});
 			const text = await response.text();
 			const cleanText = text.replace(/:NaN/g, ':null');
 			const newData = JSON.parse(cleanText);
@@ -133,8 +157,8 @@ const App = () => {
 		try {
 			// send the value in the text field (entryValue) to the server
 			const response = await fetch(url, {
-				// method: 'POST',
 				method: 'POST',
+				credentials: "include",
 				headers: {
 					'Content-Type': 'application/json', // Tells server to expect JSON
 					'Accept': 'application/json'        // Tells server client expects JSON back
@@ -168,9 +192,9 @@ const App = () => {
 			password: password,
 		};
 		try {
-			// send the value in the text field (entryValue) to the server
 			const response = await fetch(url, {
 				method: 'POST',
+				credentials: 'include',
 				headers: {
 					'Content-Type': 'application/json', // Tells server to expect JSON
 					'Accept': 'application/json'        // Tells server client expects JSON back
@@ -180,7 +204,7 @@ const App = () => {
 
 			if (!response.ok) {
 				const responseData = await response.json();
-				throw new Error(`HTTP error! Status: ${response.status} Message: ${responseData.error}`);
+				throw new Error(`HTTP error! Status: ${response.status} Message: ${responseData.message}`);
 
 			}
 
@@ -203,9 +227,9 @@ const App = () => {
 			password: password
 		};
 		try {
-			// send the value in the text field (entryValue) to the server
 			const response = await fetch(url, {
 				method: 'POST',
+				credentials: "include",
 				headers: {
 					'Content-Type': 'application/json', // Tells server to expect JSON
 					'Accept': 'application/json'        // Tells server client expects JSON back
@@ -215,12 +239,43 @@ const App = () => {
 
 			if (!response.ok) {
 				const responseData = await response.json();
-				throw new Error(`HTTP error! Status: ${response.status} Message: ${responseData.error}`);
+				throw new Error(`HTTP error! Status: ${response.status} Message: ${responseData.message}`);
 
 			}
 
 			const responseData = await response.json(); // Parses returning JSON string to object
 			console.log('Success:', responseData);
+			setLoggedIn(1);
+		} 
+		catch (err) {
+			console.error(err);
+		}
+	};
+
+	const handleLogout = async () => {
+		let path = '/auth/logout/';
+		let url = link + path;
+		console.log(url);
+
+		try {
+			const response = await fetch(url, {
+				method: 'POST',
+				credentials: "include",
+				headers: {
+					'Content-Type': 'application/json', // Tells server to expect JSON
+					'Accept': 'application/json'        // Tells server client expects JSON back
+				},
+			});
+
+			if (!response.ok) {
+				const responseData = await response.json();
+				throw new Error(`HTTP error! Status: ${response.status} Message: ${responseData.message}`);
+
+			}
+
+			const responseData = await response.json(); // Parses returning JSON string to object
+			console.log('Success:', responseData);
+			setLoggedIn(0);
 		} 
 		catch (err) {
 			console.error(err);
@@ -228,13 +283,13 @@ const App = () => {
 	};
 
 	// functions called right when the app starts.
-	useEffect(() => {getAll();}, [getAll]); // populate the list/grid
-	
+	// useEffect(() => {getAll();}, [getAll]); // populate the list/grid
+	useEffect(() => {checkLogin();},[checkLogin, loggedIn]); // check if user has login credentials already
   return (
     <div className="App">
 		
 		<div>
-			<NavigationBar title={siteTitle} setLoggedIn={setLoggedIn} loggedIn={loggedIn} />
+			<NavigationBar title={siteTitle} loggedIn={loggedIn} handleLogout={handleLogout} />
 
 		</div>
 

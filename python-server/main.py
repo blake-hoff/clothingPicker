@@ -3,19 +3,24 @@ from datetime import date, datetime
 import logging
 import requests
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, session
 from flask_cors import CORS
 from flask_migrate import Migrate
 
 from database import db, Outfit, User
-from functions import *
+from functions import invalidUserParamaters
 from werkzeug.security import generate_password_hash, check_password_hash
+import os
+from dotenv import load_dotenv
 
+# Load variables from .env file into environment
+load_dotenv(verbose=True)
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__) # for error logging
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True)  # Enables CORS to allow requests from the React frontend
+app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY')
+CORS(app, supports_credentials=True, origins=["http://localhost:3000"])  # Enables CORS to allow requests from the React frontend
 
 # Configure SQLAlchemy
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
@@ -36,7 +41,16 @@ def base_page():
 @app.route('/api/view/', methods=['GET'])
 def get_all_items():
     # Get all entries in the database
-    items = Outfit.query.filter_by(user_id=get_user_identity()).order_by(Outfit.created_at.desc())
+    userID = session.get("user_id")
+
+    if userID is None:
+        return jsonify({
+            'success': False,
+            "error": "Unauthorized user."
+        }), 401
+
+
+    items = Outfit.query.filter_by(user_id=userID).order_by(Outfit.created_at.desc())
     # need to filter by the user id based on the users credentials later on.
     # print(items)
 
@@ -69,7 +83,10 @@ def create_outfit():
     print(data)
     
     if not data:
-        return jsonify({"error": "Missing JSON payload"}), 400
+        return jsonify({
+            'success': False,
+            "error": "Missing JSON payload"
+        }), 400
         
     usersDesc = data.get("description") # get user description from payload
     userDate = data.get("date") # get user date from payload
@@ -121,7 +138,7 @@ def delete_entry(item_id):
     if not outfitEntry:
         return jsonify({
             'success': False,
-            'error': f'Item with id \"{item_id}\" not found'
+            'message': f'Item with id \"{item_id}\" not found'
         }), 404
     
     # use a try statement for a database operation that could fail.
@@ -130,7 +147,11 @@ def delete_entry(item_id):
         db.session.delete(outfitEntry)
         db.session.commit()
 
-        return jsonify({'success': True,}), 200 # if the code got here, it means that the entry has been successfully deleted
+        return jsonify({
+            'success': True,
+            'message': 'Deleted entry succcessfully.'
+            }), 200
+    
     except Exception as e:
         db.session.rollback()
         logger.error(f"Could not delete item {item_id}: {str(e)}") # log error
@@ -149,7 +170,10 @@ def sign_up():
     print(data)
     
     if not data:
-        return jsonify({"error": "Missing JSON payload"}), 400
+        return jsonify({
+            'success': False,
+            "message": "Missing JSON payload"
+            }), 400
 
     userName = data.get("username")
     userEmail = data.get("email") # get user email from payload
@@ -160,8 +184,7 @@ def sign_up():
     if(invalidParameters):
         return jsonify({
             'success': False,
-            'message': f'The parameters used are invalid.',
-            'error': parametersMessage
+            'message': f'The parameters used are invalid. {parametersMessage}'
         }), 400
 
     # retrieve the entry if an entry has been created for the chosen username from the user.
@@ -173,13 +196,13 @@ def sign_up():
     if username_db:
         return jsonify({
             'success': False,
-            'error': f'The username \'{userName}\' is taken.'
+            'message': f'The username \'{userName}\' is taken.'
         }), 400
     
     if email_db:
         return jsonify({
             'success': False,
-            'error': f'The email \'{userEmail}\' is taken.'
+            'message': f'The email \'{userEmail}\' is taken.'
         }), 400
 
 
@@ -213,7 +236,10 @@ def log_in():
     print(data)
     
     if not data:
-        return jsonify({"error": "Missing JSON payload"}), 400
+        return jsonify({
+            'success': False,
+            "error": "Missing JSON payload"
+            }), 400
 
     
     userName = data.get("username")
@@ -225,8 +251,7 @@ def log_in():
     if(invalidParameters):
         return jsonify({
             'success': False,
-            'message': f'The parameters used are invalid.',
-            'error': parametersMessage
+            'message': f'The parameters used are invalid. {parametersMessage}'
         }), 400
 
     # retrieve the entry object if an entry has been created for the chosen username from the user.
@@ -241,22 +266,52 @@ def log_in():
     
         isValidPassword = check_password_hash(username_db.password_hash, userPassword)
         if isValidPassword:
+            session.permanent = True
+            session["user_id"] = username_db.id
             return jsonify({
                 'success': True,
-                'error': f'The account with username \'{userName}\' was found and password is correct.'
+                'message': f'The account with username \'{userName}\' was found and the password is correct.'
             }), 200
         else:
             return jsonify({
                 'success': False,
-                'error': f'The username \'{userName}\' is taken and the password is incorrect.'
+                'message': f'The username \'{userName}\' is taken and the password is incorrect.'
             }), 400
 
     # if the username is not in the database send error to the user.
     else:
         return jsonify({
             'success': False,
-            'error': f'An account with the username \'{userName}\' does not exist.'
+            'message': f'An account with the username \'{userName}\' does not exist.'
         }), 400
+
+@app.route("/api/auth/logout/", methods=["POST"])
+def logout():
+    print('hello world')
+    session.clear()
+
+    return jsonify({
+        "success": True,
+        "message": "Logged out."
+    }), 200
+
+@app.route("/api/auth/user/")
+def user():
+    user_id = session.get("user_id")
+
+    if user_id is None:
+        print('not logged in')
+        return jsonify({
+            "logged_in": False
+        }), 200
+
+    user = User.query.get(user_id)
+
+    return jsonify({
+        "logged_in": True,
+        "id": user.id,
+        "username": user.username
+    }), 200
 
 # For direct execution
 if __name__ == '__main__':

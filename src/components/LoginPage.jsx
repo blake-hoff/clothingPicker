@@ -10,7 +10,7 @@ function LoginPage({title, handleSignUp, handleLogin}) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    const [login, setLogin] = useState(false); // to toggle relevant login or signup elements off/on. 
+    const [login, setLogin] = useState(true); // to toggle relevant login or signup elements off/on. 
     // login = true shows the login page, login = false shows the signup page.
 
     const handleChangeLogin = () => {

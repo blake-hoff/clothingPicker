@@ -1,9 +1,6 @@
 from datetime import date, datetime
 from email_validator import validate_email, EmailNotValidError
 
-def get_user_identity():
-    return 1
-
 def invalidUserParamaters(username, password, email='name@email.net'):
     # print(username, email, password)
     try: # these criteria must be met. if they are not met, an error will occur, jumping to the except block.
@@ -20,6 +17,7 @@ def invalidUserParamaters(username, password, email='name@email.net'):
     return False, 'Valid user parameters'
 
 
+# local data import functions
 def ensureTwoDigits(inputDigit):
     digit_as_string = f'{inputDigit}'
     if(len(digit_as_string) == 1):
@@ -94,7 +92,7 @@ def import_local_csv(databaseObject, dbModel):
     dbModel.session.commit()
 
 
-
+# unused function
 def lookupTodayEntry(databaseVariable):
     # get the current date in the correct format
     today = date.today()
