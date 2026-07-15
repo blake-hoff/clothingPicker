@@ -85,7 +85,8 @@ const App = () => {
 			const text = await response.text();
 			const cleanText = text.replace(/:NaN/g, ':null');
 			const newData = JSON.parse(cleanText);
-			console.log(newData.items);
+			// console.log(newData.items);
+			console.log('get all items')
 
 			setGridData(newData.items);
 		} 

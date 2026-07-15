@@ -82,6 +82,9 @@ def create_outfit():
     data = request.get_json() # data sent from the user frontend
     print(data)
     
+    userID = session.get("user_id") # user id sent by user
+
+
     if not data:
         return jsonify({
             'success': False,
@@ -93,8 +96,8 @@ def create_outfit():
     userDateAsDT = datetime.fromisoformat(userDate)
     # convert the string given by user (in iso format) to a python datetime object
     
-    # retrieve the entry if an entry has been created for the given date from the user.    
-    old_entry = Outfit.query.filter_by(created_at=userDateAsDT).first()
+    # retrieve the entry if an entry has been created for the given date from the user.
+    old_entry = Outfit.query.filter_by(user_id=userID, created_at=userDateAsDT).first()
 
     # if the entry already exists, should be updated with the new version
     if old_entry:
@@ -114,10 +117,13 @@ def create_outfit():
         print(f'date time payload {userDate} {type(userDate)}')
         print(f'date time converted {userDateAsDT}')
         # add to database
+        userID = session.get("user_id")
+        print(userID)
+
         entry = Outfit(description=usersDesc,
                         icon='https://images.unsplash.com/vector-1775556825284-3b697bc284bf?q=80&w=1480&auto=format&fit=crop&ixlib=rb-4.1.0',
                         created_at=userDateAsDT,
-                        user_id=get_user_identity()
+                        user_id=userID
                        )
         db.session.add(entry)
         db.session.commit()
@@ -133,6 +139,17 @@ def create_outfit():
 def delete_entry(item_id):
     # see if it is in the backends database already.
     outfitEntry = Outfit.query.filter_by(id=item_id).first()
+
+    # the user id of the database entry must match the session user id.
+    outfitUserID = outfitEntry.user_id
+
+    userID = session.get("user_id")
+
+    if outfitUserID != userID: # do not allow a malicious user to delete someone elses entry.
+        return jsonify({
+            'success': False,
+            'message': f'You cannot delete someone elses entry.'
+        }), 401
 
     # if it is not in the database, return client side error.
     if not outfitEntry:
