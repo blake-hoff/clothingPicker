@@ -4,6 +4,8 @@ import Button from '@mui/material/Button';
 import {Box, IconButton, TextField} from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import AddBoxIcon from '@mui/icons-material/AddBox';
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 
 // for the calendar date selection
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -55,6 +57,15 @@ function ActionBar({
 				/>
 
 				</Box>
+
+				<IconButton onClick={() => setSelectedDate(selectedDate.subtract(1, 'day'))} variant="contained" color="primary" sx={{ padding: '1px' }}>
+					<KeyboardArrowLeftIcon sx={{ fontSize: 32 }}/>
+				</IconButton>
+
+				<IconButton onClick={() => setSelectedDate(selectedDate.add(1, 'day'))} variant="contained" color="primary" sx={{ padding: '1px' }}>
+					<KeyboardArrowRightIcon sx={{ fontSize: 32 }}/>
+				</IconButton>
+
 			</LocalizationProvider>
 			
 			{/* user input */}
