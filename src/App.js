@@ -29,7 +29,7 @@ const formatDate = (dateStr) => {
 
 const App = () => {
     const [gridData, setGridData] = useState([]);
-	const [entryValue, setEntryValue] = useState('');
+
 	// selected date (default = today)
 	const [selectedDate, setSelectedDate] = useState(dayjs());
 	const [loggedIn, setLoggedIn] = useState(0);
@@ -38,19 +38,26 @@ const App = () => {
 	const siteTitle = "CloTrack"
 	let link = 'http://localhost:5000/api'
 
-	useEffect(() => {
-    	const existingEntry = gridData.find(item => {
-			try{
-				const getServerDate = new Date(item.date).toISOString().split("T")[0]; // the server date has been formatted to a string.
-				return getServerDate === selectedDate.format("YYYY-MM-DD"); // selectedDate is in datejs format, needs to be back to a string.
-			}catch{
-				return false;
-			}
-		});
-    
-    	setEntryValue(existingEntry ? existingEntry.description : '');
-	}, [selectedDate, gridData]);
 
+	// populating the grid
+	const getAll = React.useCallback(async () => {
+		let path = '/view/';
+		let url = link + path;
+
+		try {
+			const response = await fetch(url, {credentials: 'include'});
+			const text = await response.text();
+			const cleanText = text.replace(/:NaN/g, ':null');
+			const newData = JSON.parse(cleanText);
+			// console.log(newData.items);
+			console.log('get all items')
+
+			setGridData(newData.items);
+		} 
+		catch (err) {
+			console.log("Something went wrong!", err);
+		}
+	}, [link]);
 
 	// determine if the user has a session
 	const checkLogin = React.useCallback(async () => {
@@ -73,28 +80,7 @@ const App = () => {
 			setLoggedIn(0);
 			console.log("Not logged in");
 		}
-	}, [link]);
-
-	// populating the grid
-	const getAll = React.useCallback(async () => {
-		let path = '/view/';
-		let url = link + path;
-
-		try {
-			const response = await fetch(url, {credentials: 'include'});
-			const text = await response.text();
-			const cleanText = text.replace(/:NaN/g, ':null');
-			const newData = JSON.parse(cleanText);
-			// console.log(newData.items);
-			console.log('get all items')
-
-			setGridData(newData.items);
-		} 
-		catch (err) {
-			console.log("Something went wrong!", err);
-		}
-	}, [link]);
-
+	}, [getAll, link]);
 
 	const handleDeleteItem = async (id) => {
 		try {
@@ -146,17 +132,16 @@ const App = () => {
 		}
 	};
 
-	const createEntry = async () => {
+	const createEntry = async (entryValue, selectedDate) => {
 		let path = '/create/';
 		let url = link + path;
 
 		const payload = {
-			// username: 'johndoe',
 			description: entryValue,
 			date: selectedDate.format('YYYY-MM-DD') // format the date in a simple string for the server.
 		};
 		try {
-			// send the value in the text field (entryValue) to the server
+			// send the value in the text field to the server
 			const response = await fetch(url, {
 				method: 'POST',
 				credentials: "include",
@@ -303,9 +288,8 @@ const App = () => {
 			getAll={getAll}
 			selectedDate={selectedDate}
 			setSelectedDate={setSelectedDate}
-			entryValue={entryValue}
-			setEntryValue={setEntryValue}
 			createEntry={createEntry}
+			gridData={gridData}
 			/>
 
 

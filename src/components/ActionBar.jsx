@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import Button from '@mui/material/Button';
+import { useState, useEffect } from 'react';
 import {Box, IconButton, TextField} from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import AddBoxIcon from '@mui/icons-material/AddBox';
@@ -15,12 +15,28 @@ import dayjs from 'dayjs';
 
 function ActionBar({
     getAll,
+	gridData,
     selectedDate,
     setSelectedDate,
-    entryValue,
-    setEntryValue,
     createEntry}) {
+
+	const [entryValue, setEntryValue] = useState('');
+
+	useEffect(() => {
+		const existingEntry = gridData.find(item => {
+			try{
+				const getServerDate = new Date(item.date).toISOString().split("T")[0]; // the server date has been formatted to a string.
+				return getServerDate === selectedDate.format("YYYY-MM-DD"); // selectedDate is in datejs format, needs to be back to a string.
+			}catch{
+				return false;
+			}
+		});
+	
+		setEntryValue(existingEntry ? existingEntry.description : '');
+	}, [selectedDate, gridData]);
+
     return (
+
 		<Box sx={{position: "static", width: "100%", display: "flex", alignItems: "center", gap: 2, padding: 2, borderBottom: "5px solid rgba(255,255,255,0.2)"}}>
 			{/* refresh button */}
 			<IconButton onClick={getAll} sx={{backgroundColor: "secondary.main", color: "white", "&:hover": { backgroundColor: "secondary.dark" }}}>
@@ -98,7 +114,7 @@ function ActionBar({
 			/>
 
 			{/* search catalog*/}
-			<IconButton onClick={() => createEntry()} variant="contained" color="primary" sx={{ padding: '16px' }}>
+			<IconButton onClick={() => createEntry(entryValue, selectedDate)} variant="contained" color="primary" sx={{ padding: '16px' }}>
 				<AddBoxIcon sx={{ fontSize: 32 }}/>
 			</IconButton>
 
