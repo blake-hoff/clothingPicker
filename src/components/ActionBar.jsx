@@ -6,6 +6,8 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import EventRepeatIcon from '@mui/icons-material/EventRepeat';
+import Tooltip from '@mui/material/Tooltip';
 
 // for the calendar date selection
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -39,9 +41,12 @@ function ActionBar({
 
 		<Box sx={{position: "static", width: "100%", display: "flex", alignItems: "center", gap: 2, padding: 2, borderBottom: "5px solid rgba(255,255,255,0.2)"}}>
 			{/* refresh button */}
-			<IconButton onClick={getAll} sx={{backgroundColor: "secondary.main", color: "white", "&:hover": { backgroundColor: "secondary.dark" }}}>
-				<RefreshIcon />
-			</IconButton>
+
+			<Tooltip title="Reload" arrow>
+				<IconButton onClick={getAll} sx={{backgroundColor: "secondary.main", color: "white", "&:hover": { backgroundColor: "secondary.dark" }}}>
+					<RefreshIcon />
+				</IconButton>
+			</Tooltip>
 			
 			{/* calendar date selection */}
 			<LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -70,17 +75,28 @@ function ActionBar({
 						fullWidth: true // match input width to container
 						} 
 					}} 
+					
 				/>
-
+	
 				</Box>
+				
+				<Tooltip title="Jump to Today" arrow>
+					<IconButton onClick={() => setSelectedDate(dayjs(new Date()))} variant="contained" color="primary" sx={{ padding: '1px' }}>
+						<EventRepeatIcon sx={{ fontSize: 32 }}/>
+					</IconButton>
+				</Tooltip>
 
-				<IconButton onClick={() => setSelectedDate(selectedDate.subtract(1, 'day'))} variant="contained" color="primary" sx={{ padding: '1px' }}>
-					<KeyboardArrowLeftIcon sx={{ fontSize: 32 }}/>
-				</IconButton>
+				<Tooltip title="Back One Day" arrow>
+					<IconButton onClick={() => setSelectedDate(selectedDate.subtract(1, 'day'))} variant="contained" color="primary" sx={{ padding: '1px' }}>
+						<KeyboardArrowLeftIcon sx={{ fontSize: 32 }}/>
+					</IconButton>
+				</Tooltip>
 
-				<IconButton onClick={() => setSelectedDate(selectedDate.add(1, 'day'))} variant="contained" color="primary" sx={{ padding: '1px' }}>
-					<KeyboardArrowRightIcon sx={{ fontSize: 32 }}/>
-				</IconButton>
+				<Tooltip title="Forward One Day" arrow>
+					<IconButton onClick={() => setSelectedDate(selectedDate.add(1, 'day'))} variant="contained" color="primary" sx={{ padding: '1px' }}>
+						<KeyboardArrowRightIcon sx={{ fontSize: 32 }}/>
+					</IconButton>
+				</Tooltip>
 
 			</LocalizationProvider>
 			
@@ -113,14 +129,15 @@ function ActionBar({
 				onChange={(event) => {setEntryValue(event.target.value);}}
 			/>
 
-			{/* search catalog*/}
-			<IconButton onClick={() => createEntry(entryValue, selectedDate)} variant="contained" color="primary" sx={{ padding: '16px' }}>
-				<AddBoxIcon sx={{ fontSize: 32 }}/>
-			</IconButton>
-
+			{/* enter */}
+			<Tooltip title="Enter" arrow>
+				<IconButton onClick={() => createEntry(entryValue, selectedDate)} variant="contained" color="primary" sx={{ padding: '16px' }}>
+					<AddBoxIcon sx={{ fontSize: 32 }}/>
+				</IconButton>
+			</Tooltip>
 
 		</Box>
-    );
+		);
 }
 
 export default ActionBar;

@@ -11,7 +11,7 @@ import NavigationBar from './components/NavigationBar';
 import ActionBar from './components/ActionBar';
 import ItemGrid from './components/ItemGrid';
 import LoginPage from './components/LoginPage';
-
+import MessageScreen from './components/MessageScreen';
 
 
 // convert a datetime object from the server to a more readable format for the frontend.
@@ -190,8 +190,14 @@ const App = () => {
 
 			if (!response.ok) {
 				const responseData = await response.json();
-				throw new Error(`HTTP error! Status: ${response.status} Message: ${responseData.message}`);
+				
+				MessageScreen({
+					title: response.status,
+					message: responseData.message,
+					type: 'error'
+				});
 
+				throw new Error(`HTTP error! Status: ${response.status} Message: ${responseData.message}`);
 			}
 
 			const responseData = await response.json(); // Parses returning JSON string to object
@@ -225,8 +231,14 @@ const App = () => {
 
 			if (!response.ok) {
 				const responseData = await response.json();
-				throw new Error(`HTTP error! Status: ${response.status} Message: ${responseData.message}`);
+				
+				MessageScreen({
+					title: response.status,
+					message: responseData.message,
+					type: 'error'
+				});
 
+				throw new Error(`HTTP error! Status: ${response.status} Message: ${responseData.message}`);
 			}
 
 			const responseData = await response.json(); // Parses returning JSON string to object
@@ -269,7 +281,6 @@ const App = () => {
 	};
 
 	// functions called right when the app starts.
-	// useEffect(() => {getAll();}, [getAll]); // populate the list/grid
 	useEffect(() => {checkLogin();},[checkLogin, loggedIn]); // check if user has login credentials already
   return (
     <div className="App">

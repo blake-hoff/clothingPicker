@@ -265,6 +265,7 @@ def log_in():
     # print(userName, userPassword)
 
     invalidParameters, parametersMessage = invalidUserParamaters(username=userName, password=userPassword)
+
     if(invalidParameters):
         return jsonify({
             'success': False,
@@ -292,7 +293,7 @@ def log_in():
         else:
             return jsonify({
                 'success': False,
-                'message': f'The username \'{userName}\' is taken and the password is incorrect.'
+                'message': f'The account with username \'{userName}\' was found and the password is incorrect.'
             }), 400
 
     # if the username is not in the database send error to the user.

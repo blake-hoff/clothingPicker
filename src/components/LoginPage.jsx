@@ -1,9 +1,8 @@
 import * as React from 'react';
 import { useState } from 'react';
-import {Typography, Box, AppBar, Toolbar, TextField, Paper} from '@mui/material';
+import {Typography, Box, TextField, Paper} from '@mui/material';
 // misc buttons/icons
 import { Button } from '@mui/material';
-import AddBoxIcon from '@mui/icons-material/AddBox';
 
 function LoginPage({title, handleSignUp, handleLogin}) {
     const [username, setUsername] = useState('');
