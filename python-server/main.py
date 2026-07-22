@@ -7,7 +7,7 @@ from flask import Flask, jsonify, request, session
 from flask_cors import CORS
 from flask_migrate import Migrate
 
-from database import db, Outfit, User
+from database import db, Entry, EntryType, User
 from functions import invalidUserParamaters
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
@@ -50,7 +50,7 @@ def get_all_items():
         }), 401
 
 
-    items = Outfit.query.filter_by(user_id=userID).order_by(Outfit.created_at.desc())
+    items = Entry.query.filter_by(user_id=userID).order_by(Entry.entry_date.desc())
     # need to filter by the user id based on the users credentials later on.
     # print(items)
 
@@ -64,7 +64,7 @@ def get_all_items():
         'items': [{'name':'tempName', 
                    'id': item.id,
                     'icon':item.icon,
-                    'date': item.created_at,
+                    'date': item.entry_date,
                     'description': item.description
                     } for item in items],
         'date': date.today() # extra info for frontend to know the date from the server.
@@ -72,8 +72,8 @@ def get_all_items():
 
 # Create an entry in the database
 @app.route('/api/create/', methods=['POST'])
-def create_outfit():
-    print('create_outfit')
+def create_entry():
+    print('create_entry')
 
     # 1. ensure the request is safe to read from,
     # read the request, split up the values into variables here.
@@ -95,9 +95,12 @@ def create_outfit():
     userDate = data.get("date") # get user date from payload
     userDateAsDT = datetime.fromisoformat(userDate)
     # convert the string given by user (in iso format) to a python datetime object
+
+    selectedTypeID = 1 # todo: change to what the user submits.
+    selectedName = 'Outfit' # todo: change to what the user submits (may just be outfit for outfit type.)
     
     # retrieve the entry if an entry has been created for the given date from the user.
-    old_entry = Outfit.query.filter_by(user_id=userID, created_at=userDateAsDT).first()
+    old_entry = Entry.query.filter_by(user_id=userID, entry_date=userDateAsDT).first()
 
     # if the entry already exists, should be updated with the new version
     if old_entry:
@@ -120,10 +123,12 @@ def create_outfit():
         userID = session.get("user_id")
         print(userID)
 
-        entry = Outfit(description=usersDesc,
+        entry = Entry(description=usersDesc,
                         icon='https://images.unsplash.com/vector-1775556825284-3b697bc284bf?q=80&w=1480&auto=format&fit=crop&ixlib=rb-4.1.0',
-                        created_at=userDateAsDT,
-                        user_id=userID
+                        entry_date=userDateAsDT,
+                        user_id=userID,
+                        type_id=selectedTypeID,
+                        name=selectedName
                        )
         db.session.add(entry)
         db.session.commit()
@@ -138,7 +143,7 @@ def create_outfit():
 @app.route('/api/item/<int:item_id>', methods=['DELETE'])
 def delete_entry(item_id):
     # see if it is in the backends database already.
-    outfitEntry = Outfit.query.filter_by(id=item_id).first()
+    outfitEntry = Entry.query.filter_by(id=item_id).first()
 
     # the user id of the database entry must match the session user id.
     outfitUserID = outfitEntry.user_id
