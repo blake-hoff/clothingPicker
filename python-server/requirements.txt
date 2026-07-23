@@ -18,3 +18,5 @@ Flask-Migrate
 email_validator
 
 dotenv
+
+pytest

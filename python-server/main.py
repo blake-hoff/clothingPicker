@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__) # for error logging
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY')
 CORS(app, supports_credentials=True, origins=["http://localhost:3000"])  # Enables CORS to allow requests from the React frontend
+print(app.url_map)
 
 # Configure SQLAlchemy
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
@@ -51,20 +52,15 @@ def get_all_items():
 
 
     items = Entry.query.filter_by(user_id=userID).order_by(Entry.entry_date.desc())
-    # need to filter by the user id based on the users credentials later on.
-    # print(items)
-
-    #this can use flask login which is not set up yet.
-    # user_items = UserItem.query.filter_by(user_id=current_user.id).all()
-    # for ui in user_items:
-    #     print(ui.item.name, ui.item.description)
 
     return jsonify({
         'success': True,
-        'items': [{'name':'tempName', 
-                   'id': item.id,
+        'items': [{'id': item.id,
+                   'type_id': item.type_id,
+                    'name':item.name,
                     'icon':item.icon,
                     'date': item.entry_date,
+                    'created_at': item.created_at,
                     'description': item.description
                     } for item in items],
         'date': date.today() # extra info for frontend to know the date from the server.
@@ -97,7 +93,7 @@ def create_entry():
     # convert the string given by user (in iso format) to a python datetime object
 
     selectedTypeID = 1 # todo: change to what the user submits.
-    selectedName = 'Outfit' # todo: change to what the user submits (may just be outfit for outfit type.)
+    selectedName = 'Outfit' # todo: change to what the user submits (likely will be named outfit for outfit type; user can choose for other types.)
     
     # retrieve the entry if an entry has been created for the given date from the user.
     old_entry = Entry.query.filter_by(user_id=userID, entry_date=userDateAsDT).first()
@@ -178,7 +174,32 @@ def delete_entry(item_id):
         db.session.rollback()
         logger.error(f"Could not delete item {item_id}: {str(e)}") # log error
 
+# type apis
 
+# get all rows of types in the database
+@app.route('/api/types/', methods=['GET'])
+def get_all_types():
+    # Get all types in the database
+    userID = session.get("user_id")
+
+    if userID is None:
+        return jsonify({
+            'success': False,
+            "error": "Unauthorized user."
+        }), 401
+
+
+    types = EntryType.query
+
+    return jsonify({
+        'success': True,
+        'items': [{
+                   'id': type.id,
+                    'name': type.name,
+                    'created_at': type.created_at
+                    } for type in types],
+        'date': date.today() # extra info for frontend to know the date from the server.
+    }), 200
 
 @app.route('/api/auth/signup/', methods=['POST'])
 def sign_up():
@@ -219,13 +240,13 @@ def sign_up():
         return jsonify({
             'success': False,
             'message': f'The username \'{userName}\' is taken.'
-        }), 400
+        }), 202
     
     if email_db:
         return jsonify({
             'success': False,
             'message': f'The email \'{userEmail}\' is taken.'
-        }), 400
+        }), 202
 
 
     # if the username is not in the database it can be added.
@@ -310,7 +331,6 @@ def log_in():
 
 @app.route("/api/auth/logout/", methods=["POST"])
 def logout():
-    print('hello world')
     session.clear()
 
     return jsonify({
