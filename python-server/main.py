@@ -69,8 +69,6 @@ def get_all_items():
 # Create an entry in the database
 @app.route('/api/create/', methods=['POST'])
 def create_entry():
-    print('create_entry')
-
     # 1. ensure the request is safe to read from,
     # read the request, split up the values into variables here.
     
@@ -201,6 +199,128 @@ def get_all_types():
         'date': date.today() # extra info for frontend to know the date from the server.
     }), 200
 
+# Create an entry in the type table
+@app.route('/api/types/create/', methods=['POST'])
+def create_entry_type():
+    data = request.get_json() # data sent from the user frontend
+    # print(data)
+    
+    userID = session.get("user_id") # user id sent by user
+
+    if not data:
+        return jsonify({
+            'success': False,
+            "error": "Missing JSON payload"
+        }), 400
+        
+    usersTypeName = data.get("name") # get users type name from payload
+    
+    # retrieve the entry if an entry has been created for the given date from the user.
+    old_type = EntryType.query.filter_by(name=usersTypeName).first()
+
+    # if the type already exists
+    if old_type:
+        return jsonify({
+            'success': False,
+            'message': f'Entry type already exists with name {usersTypeName}.'
+        }), 200
+
+
+    # if it is not in the database it can be added.
+    else:
+        # add to database
+        userID = session.get("user_id")
+        print(userID)
+
+        entry = EntryType(name=usersTypeName)
+        db.session.add(entry)
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': f'Created new entryType because one did not exist with name {usersTypeName}.'
+        }), 200
+
+# Update an entry in the type table
+@app.route('/api/types/update/', methods=['POST'])
+def update_entry_type():
+    data = request.get_json() # data sent from the user frontend
+    # print(data)
+    
+    userID = session.get("user_id") # user id sent by user
+
+    if not data:
+        return jsonify({
+            'success': False,
+            "error": "Missing JSON payload"
+        }), 400
+        
+    usersTypeName = data.get("name") # get users type name from payload
+    usersTypeID = data.get("type_id")
+    
+    # retrieve the entry if an entry has been created for the given date from the user.
+    old_type = EntryType.query.filter_by(id=usersTypeID).first()
+
+    # if the type already exists, must update with new information
+    if old_type and old_type.name != usersTypeName:
+        old_type.name = usersTypeName
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': f'Updated TntryType name because an EntryType did exist with name {usersTypeName}.'
+        }), 200
+
+
+    # if it is not in the database return an error.
+    else:
+        return jsonify({
+            'success': False,
+            'message': f'An entryType with name {usersTypeName} did not exist.'
+        }), 200
+
+# Update an entry in the type table
+@app.route('/api/types/delete/', methods=['DELETE'])
+def delete_entry_type():
+    data = request.get_json() # data sent from the user frontend
+    # print(data)
+    
+    userID = session.get("user_id") # user id sent by user
+
+    if not data:
+        return jsonify({
+            'success': False,
+            "error": "Missing JSON payload"
+        }), 400
+    
+    usersTypeID = data.get("type_id")
+    
+    # retrieve the entry if an entry has been created for the given date from the user.
+    old_type = EntryType.query.filter_by(id=usersTypeID).first()
+
+    # if it is not in the database, return client side error.
+    if not old_type:
+        return jsonify({
+            'success': False,
+            'message': f'Item with id \"{usersTypeID}\" not found'
+        }), 404
+    
+    # use a try statement for a database operation that could fail.
+    try:
+        # attempt to delete the entry in the database 
+        db.session.delete(old_type)
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': 'Deleted entry succcessfully.'
+            }), 200
+    
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Could not delete item {usersTypeID}: {str(e)}") # log error
+
+# ---------- Authentication Routes ----------
 @app.route('/api/auth/signup/', methods=['POST'])
 def sign_up():
     # 1. ensure the request is safe to read from,

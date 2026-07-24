@@ -60,3 +60,22 @@ def test_get_endpoint_invalid(client):
     # print(response)
     assert response.status_code == 401
     assert response.json["success"] == False
+
+def test_create_type_invalid(auth_client):
+    response = auth_client.post('/api/types/create/', json={"name": "Outfit"})
+    print(response.json)
+    assert response.status_code == 200
+    assert response.json["success"] == False
+
+def test_delete_type_invalid(auth_client):
+    # later change to retrieve the length to always select an id that does not have an entry.
+    response = auth_client.delete('/api/types/delete/', json={"type_id": 50}) 
+    print(response.json)
+    assert response.status_code == 404
+    assert response.json["success"] == False
+
+def test_update_type_invalid(auth_client):
+    response = auth_client.post('/api/types/update/', json={"name": "Outfit", "type_id": 1})
+    print(response.json)
+    assert response.status_code == 200
+    assert response.json["success"] == False
