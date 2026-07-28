@@ -188,12 +188,11 @@ def get_all_types():
 
 
     types = EntryType.query
+    nullEntry = {'name': 'Select Type', 'created_at': ''} # blank entry for filling in the first index. (db indexes start at 1)
 
     return jsonify({
         'success': True,
-        'items': [{
-                   'id': type.id,
-                    'name': type.name,
+        'items': [nullEntry] + [{'name': type.name,
                     'created_at': type.created_at
                     } for type in types],
         'date': date.today() # extra info for frontend to know the date from the server.

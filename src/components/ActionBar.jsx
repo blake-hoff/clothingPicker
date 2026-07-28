@@ -16,7 +16,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 
 function ActionBar({
-    getAll,
+    handleGetAll,
 	gridData,
     selectedDate,
     setSelectedDate,
@@ -43,7 +43,7 @@ function ActionBar({
 			{/* refresh button */}
 
 			<Tooltip title="Reload" arrow>
-				<IconButton onClick={getAll} sx={{backgroundColor: "secondary.main", color: "white", "&:hover": { backgroundColor: "secondary.dark" }}}>
+				<IconButton onClick={handleGetAll} sx={{backgroundColor: "secondary.main", color: "white", "&:hover": { backgroundColor: "secondary.dark" }}}>
 					<RefreshIcon />
 				</IconButton>
 			</Tooltip>

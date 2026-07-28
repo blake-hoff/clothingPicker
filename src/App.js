@@ -28,11 +28,12 @@ const formatDate = (dateStr) => {
 };
 
 const App = () => {
-    const [gridData, setGridData] = useState([]);
+    const [gridData, setGridData] = useState([]); // array of {id, type_id, name, icon, date, created_at, description}
+	const [typeData, setTypeData] = useState([]); // array of {name, created_at} (use [id+1] to access a particular id since ids start at 1)
 
 	// selected date (default = today)
 	const [selectedDate, setSelectedDate] = useState(dayjs());
-	const [loggedIn, setLoggedIn] = useState(0);
+	const [loggedIn, setLoggedIn] = useState(-1); // set to -1 so neither loginpage or the user page is displayed until the server responds
 	
 	// site title passed into various components.
 	const siteTitle = "CloTrack"
@@ -40,24 +41,50 @@ const App = () => {
 
 
 	// populating the grid
-	const getAll = React.useCallback(async () => {
+	const getGridData = React.useCallback(async () => {
 		let path = '/view/';
 		let url = link + path;
 
 		try {
-			const response = await fetch(url, {credentials: 'include'});
-			const text = await response.text();
-			const cleanText = text.replace(/:NaN/g, ':null');
-			const newData = JSON.parse(cleanText);
-			// console.log(newData.items);
+			const response = await fetch(url, {credentials: 'include'}); // must be authorized user
+			const data = await response.json();
+			console.log(data.items);
 			console.log('get all items')
 
-			setGridData(newData.items);
+			setGridData(data.items);
 		} 
 		catch (err) {
 			console.log("Something went wrong!", err);
 		}
 	}, [link]);
+
+	// populating the type data dropdown/filter
+	const getTypeData = React.useCallback(async () => {
+		let path = '/types/';
+		let url = link + path;
+
+		try {
+			const response = await fetch(url, {credentials: 'include'}); // must be authorized user
+			const data = await response.json();
+			console.log(data.items);
+			console.log('get all types')
+
+			setTypeData(data.items);
+		} 
+		catch (err) {
+			console.log("Something went wrong!", err);
+		}
+	}, [link]);
+
+	const handleGetAll = React.useCallback(async () => {
+		try {
+			getGridData();
+			getTypeData();
+		}
+		catch (err) {
+			console.error(err);
+		}
+	}, [getGridData, getTypeData]);
 
 	// determine if the user has a session
 	const checkLogin = React.useCallback(async () => {
@@ -73,20 +100,20 @@ const App = () => {
 
 		if(data.logged_in){
 			setLoggedIn(1);
-			getAll();
+			handleGetAll();
 			console.log("Logged in");
 		}
 		else{
 			setLoggedIn(0);
 			console.log("Not logged in");
 		}
-	}, [getAll, link]);
+	}, [handleGetAll, link]);
 
 	const handleDeleteItem = async (id) => {
 		try {
 			const outputDelete = await deleteItem(id);
 			console.log(outputDelete)
-			getAll(); // retrieve the updated grid after deletion.
+			handleGetAll(); // retrieve the updated grid after deletion.
 		}
 		catch (err) {
 			console.error(err);
@@ -125,7 +152,7 @@ const App = () => {
 			const stringDate = new Date(item_date).toISOString().split("T")[0];
 			setSelectedDate(dayjs(stringDate)); // the calendar component needs the date to be in datejs format
 
-			// getAll();
+			// handleGetAll();
 		}
 		catch (err) {
 			console.error(err);
@@ -159,7 +186,7 @@ const App = () => {
 			const responseData = await response.json(); // Parses returning JSON string to object
 			console.log('Success:', responseData);
 
-			getAll();
+			handleGetAll();
 		} 
 		catch (err) {
 			console.error(err);
@@ -296,7 +323,7 @@ const App = () => {
 
 		{loggedIn === 1 && <div>
 			<ActionBar 
-			getAll={getAll}
+			handleGetAll={handleGetAll}
 			selectedDate={selectedDate}
 			setSelectedDate={setSelectedDate}
 			createEntry={createEntry}
@@ -311,6 +338,7 @@ const App = () => {
 			formatDate={formatDate}
 			handleEditItem={handleEditItem}
 			handleDeleteItem={handleDeleteItem}
+			typeData={typeData}
 			/>
 		</div>}
 		

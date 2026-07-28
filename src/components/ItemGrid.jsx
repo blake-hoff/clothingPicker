@@ -9,7 +9,8 @@ function ItemGrid({
     gridData,
     formatDate,
     handleEditItem,
-    handleDeleteItem
+    handleDeleteItem,
+    typeData // using the id from gridData for a specific item, get the name of the type and the created_at
     }) {
     return (
     <Box sx={{ width: '99vw'}}>
@@ -27,8 +28,13 @@ function ItemGrid({
                         <Grid container spacing={2} alignItems="center">
                             <Grid sx={{ width: "20%" }}>
                                 <Typography variant="h6">
-                                    {formatDate(item.date)}  
+                                    {formatDate(item.date)}
                                 </Typography>
+                                
+                                <Typography variant="h6">
+                                    {(typeData[item.type_id]).name}
+                                </Typography>
+                                
                             </Grid>
                             
                             <Grid sx={{ width: "60%" }}>
