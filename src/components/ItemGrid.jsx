@@ -32,7 +32,7 @@ function ItemGrid({
                                 </Typography>
                                 
                                 <Typography variant="h6">
-                                    {(typeData[item.type_id]).name}
+                                    {(typeData[item.type_id - 1]).name}
                                 </Typography>
                                 
                             </Grid>

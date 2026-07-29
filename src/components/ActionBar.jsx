@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { useState, useEffect } from 'react';
-import {Box, IconButton, TextField} from '@mui/material';
+import {Box, IconButton, TextField, InputLabel, FormControl, Select, MenuItem} from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
@@ -20,22 +20,33 @@ function ActionBar({
 	gridData,
     selectedDate,
     setSelectedDate,
-    createEntry}) {
-
+    createEntry,
+	typeData
+	}) {
+	
 	const [entryValue, setEntryValue] = useState('');
+	const [selectedType, setSelectedType] = useState('Outfit');
 
 	useEffect(() => {
-		const existingEntry = gridData.find(item => {
+		const existingEntry = gridData.find(item => { // looking at all items in the grid, do some tests, 
+		// if its true then set existing entry to this item, false (catch) then skip to the next element in the grid.
 			try{
 				const getServerDate = new Date(item.date).toISOString().split("T")[0]; // the server date has been formatted to a string.
-				return getServerDate === selectedDate.format("YYYY-MM-DD"); // selectedDate is in datejs format, needs to be back to a string.
+				const getServerType = typeData[item.type_id-1].name; // a particular item in the grids type.
+				// console.log('type', getServerType, selectedType, getServerType === selectedType);
+
+				return getServerDate === selectedDate.format("YYYY-MM-DD") && getServerType === selectedType;
+				
+				// selectedDate is in datejs format, needs to be back to a string to compare to the grid (server) date
+				// also need to make sure that the clients selected type matches this particular items type.
+				// if both (and &&) match (===), it will return true.
 			}catch{
 				return false;
 			}
 		});
 	
 		setEntryValue(existingEntry ? existingEntry.description : '');
-	}, [selectedDate, gridData]);
+	}, [selectedDate, selectedType, gridData, typeData]);
 
     return (
 
@@ -99,6 +110,41 @@ function ActionBar({
 				</Tooltip>
 
 			</LocalizationProvider>
+
+			<Box 
+				sx={{ 
+					width: '5vw',
+					display: 'flex', 
+					justifyContent: 'center', 
+					"& .MuiOutlinedInput-root": {
+					color: "#afc8fb",
+					"& fieldset": { borderColor: "#4f86f8" }, 
+					"&:hover fieldset": { borderColor: "#afc8fb", borderWidth: "3px" }, 
+					"&.Mui-focused fieldset": { borderColor: "#afc8fb" } 
+					}, 
+					"& .MuiInputLabel-root": { color: "#afc8fb" },
+					"& .MuiInputLabel-root.Mui-focused": { color: "#afc8fb" }
+				}}
+			> 
+				<FormControl fullWidth variant="outlined"> 
+					<InputLabel id="select-label">Select Type</InputLabel> 
+					
+					<Select 
+						labelId="select-label"
+						value={selectedType}
+						onChange={(event) => setSelectedType(event.target.value)}
+						label="Select Type"
+					> 
+						{typeData.map((item) => ( 
+						<MenuItem key={item.name} value={item.name}> 
+							{item.name} 
+						</MenuItem> 
+						))} 
+					</Select> 
+				</FormControl> 
+			</Box>
+
+	  
 			
 			{/* user input */}
 			<TextField 
@@ -131,7 +177,7 @@ function ActionBar({
 
 			{/* enter */}
 			<Tooltip title="Enter" arrow>
-				<IconButton onClick={() => createEntry(entryValue, selectedDate)} variant="contained" color="primary" sx={{ padding: '16px' }}>
+				<IconButton onClick={() => createEntry(entryValue, selectedDate, selectedType)} variant="contained" color="primary" sx={{ padding: '16px' }}>
 					<AddBoxIcon sx={{ fontSize: 32 }}/>
 				</IconButton>
 			</Tooltip>

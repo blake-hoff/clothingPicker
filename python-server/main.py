@@ -89,12 +89,16 @@ def create_entry():
     userDate = data.get("date") # get user date from payload
     userDateAsDT = datetime.fromisoformat(userDate)
     # convert the string given by user (in iso format) to a python datetime object
+    
+    usersTypeName = data.get("type_name") # get users type name from payload    
+    # retrieve the entry if an entry has been created for the given date from the user.
+    old_type = EntryType.query.filter_by(name=usersTypeName).first()
 
-    selectedTypeID = 1 # todo: change to what the user submits.
-    selectedName = 'Outfit' # todo: change to what the user submits (likely will be named outfit for outfit type; user can choose for other types.)
+    selectedTypeID = old_type.id
+    selectedName = old_type.name # todo: change to what the user submits (likely will be named outfit for outfit type; user can choose for other types.)
     
     # retrieve the entry if an entry has been created for the given date from the user.
-    old_entry = Entry.query.filter_by(user_id=userID, entry_date=userDateAsDT).first()
+    old_entry = Entry.query.filter_by(user_id=userID, entry_date=userDateAsDT, type_id=selectedTypeID).first()
 
     # if the entry already exists, should be updated with the new version
     if old_entry:
@@ -188,11 +192,11 @@ def get_all_types():
 
 
     types = EntryType.query
-    nullEntry = {'name': 'Select Type', 'created_at': ''} # blank entry for filling in the first index. (db indexes start at 1)
+    
 
     return jsonify({
         'success': True,
-        'items': [nullEntry] + [{'name': type.name,
+        'items': [{'name': type.name, # (db indexes start at 1, there is no zero element.)
                     'created_at': type.created_at
                     } for type in types],
         'date': date.today() # extra info for frontend to know the date from the server.

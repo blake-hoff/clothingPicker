@@ -29,7 +29,7 @@ const formatDate = (dateStr) => {
 
 const App = () => {
     const [gridData, setGridData] = useState([]); // array of {id, type_id, name, icon, date, created_at, description}
-	const [typeData, setTypeData] = useState([]); // array of {name, created_at} (use [id+1] to access a particular id since ids start at 1)
+	const [typeData, setTypeData] = useState([]); // array of {name, created_at} (use [id-1] to access a particular id; ids start at 1)
 
 	// selected date (default = today)
 	const [selectedDate, setSelectedDate] = useState(dayjs());
@@ -159,13 +159,14 @@ const App = () => {
 		}
 	};
 
-	const createEntry = async (entryValue, selectedDate) => {
+	const createEntry = async (entryValue, selectedDate, selectedType) => {
 		let path = '/create/';
 		let url = link + path;
 
 		const payload = {
 			description: entryValue,
-			date: selectedDate.format('YYYY-MM-DD') // format the date in a simple string for the server.
+			date: selectedDate.format('YYYY-MM-DD'), // format the date in a simple string for the server.
+			type_name: selectedType
 		};
 		try {
 			// send the value in the text field to the server
@@ -328,6 +329,7 @@ const App = () => {
 			setSelectedDate={setSelectedDate}
 			createEntry={createEntry}
 			gridData={gridData}
+			typeData={typeData}
 			/>
 
 
