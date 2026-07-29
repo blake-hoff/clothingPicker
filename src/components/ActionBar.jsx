@@ -21,11 +21,13 @@ function ActionBar({
     selectedDate,
     setSelectedDate,
     createEntry,
-	typeData
+	typeData,
+	selectedType,
+	setSelectedType
 	}) {
 	
 	const [entryValue, setEntryValue] = useState('');
-	const [selectedType, setSelectedType] = useState('Outfit');
+	// const [selectedType, setSelectedType] = useState('Outfit');
 
 	useEffect(() => {
 		const existingEntry = gridData.find(item => { // looking at all items in the grid, do some tests, 

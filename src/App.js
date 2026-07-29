@@ -29,8 +29,10 @@ const formatDate = (dateStr) => {
 
 const App = () => {
     const [gridData, setGridData] = useState([]); // array of {id, type_id, name, icon, date, created_at, description}
+	
 	const [typeData, setTypeData] = useState([]); // array of {name, created_at} (use [id-1] to access a particular id; ids start at 1)
-
+	const [selectedType, setSelectedType] = useState('Outfit');
+	
 	// selected date (default = today)
 	const [selectedDate, setSelectedDate] = useState(dayjs());
 	const [loggedIn, setLoggedIn] = useState(-1); // set to -1 so neither loginpage or the user page is displayed until the server responds
@@ -143,7 +145,7 @@ const App = () => {
 		}
 	}
 
-	const handleEditItem = async (item_date) => {
+	const handleEditItem = async (item_date, item_type) => {
 		try {
 
 			// update the selectedDate, which will automatically notice that the description is different.
@@ -151,7 +153,7 @@ const App = () => {
 			// console.log(item_date);
 			const stringDate = new Date(item_date).toISOString().split("T")[0];
 			setSelectedDate(dayjs(stringDate)); // the calendar component needs the date to be in datejs format
-
+			setSelectedType(item_type);
 			// handleGetAll();
 		}
 		catch (err) {
@@ -330,6 +332,8 @@ const App = () => {
 			createEntry={createEntry}
 			gridData={gridData}
 			typeData={typeData}
+			selectedType={selectedType}
+			setSelectedType={setSelectedType}
 			/>
 
 

@@ -45,7 +45,7 @@ function ItemGrid({
                             
                             <Grid sx={{ width: "8%", justifyContent: "flex-end"}}>
                                 <Box sx={{ display: "flex", gap: 0, mt: 1, justifyContent: "flex-start", backgroundColor: '#3e4132',   borderRadius: '10px'}}>
-                                    <IconButton variant="contained" color="info" size="small" onClick={() => handleEditItem(item.date)}>
+                                    <IconButton variant="contained" color="info" size="small" onClick={() => handleEditItem(item.date, typeData[item.type_id-1].name)}>
                                         <EditIcon/>
                                     </IconButton>
 
