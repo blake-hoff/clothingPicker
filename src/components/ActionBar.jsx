@@ -172,7 +172,7 @@ function ActionBar({
 				},
 			}}
 
-				label="Enter outfit here" 
+				label={"Enter " + selectedType + " here"}
 				value={entryValue} 
 				onChange={(event) => {setEntryValue(event.target.value);}}
 			/>
