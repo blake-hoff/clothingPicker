@@ -150,31 +150,32 @@ function ActionBar({
 			
 			{/* user input */}
 			<TextField 
+				multiline
+      			minRows={1}
+      			maxRows={6}
 				id="outlined-controlled" 
-				
-				
-			sx={{"& .MuiOutlinedInput-root": 
-					{color: "#afc8fb","& fieldset": {borderColor: "#4f86f8",},
-
-					"&:hover fieldset": {
-					borderColor: "#afc8fb", 
-					borderWidth: "3px",
-					},
-
-					"&.Mui-focused fieldset": {
-					borderColor: "#4f86f8",
-					borderWidth: "4px",
-					},
-				},
-
-				"& .MuiInputLabel-root": {
-					color: "#afc8fb",
-				},
-			}}
-
-				label={"Enter " + selectedType + " here"}
+				label={"Enter " + selectedType + " Here"}
 				value={entryValue} 
 				onChange={(event) => {setEntryValue(event.target.value);}}
+
+				sx={{"& .MuiOutlinedInput-root": 
+						{color: "#afc8fb","& fieldset": {borderColor: "#4f86f8",},
+
+						"&:hover fieldset": {
+						borderColor: "#afc8fb", 
+						borderWidth: "3px",
+						},
+
+						"&.Mui-focused fieldset": {
+						borderColor: "#4f86f8",
+						borderWidth: "4px",
+						},
+					},
+
+					"& .MuiInputLabel-root": {
+						color: "#afc8fb",
+					},
+				}}
 			/>
 
 			{/* enter */}
