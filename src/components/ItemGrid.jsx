@@ -32,7 +32,14 @@ function ItemGrid({
                                 </Typography>
                                 
                                 <Typography variant="h6">
-                                    {(typeData[item.type_id - 1]).name}
+                                    {/* if the name is the same as the type or the name contains the type, */}
+                                    {/* set the text to the format 'name'. */}
+                                    {/* otherwise, */}
+                                    {/* set the text to the format 'type - name' */}
+
+                                    {((((typeData[item.type_id - 1]).name) === (item.name)) || (item.name).includes(((typeData[item.type_id - 1]).name))) 
+                                    ?
+                                    (item.name) : (((typeData[item.type_id - 1]).name) + ' - ' + (item.name))}
                                 </Typography>
                                 
                             </Grid>
