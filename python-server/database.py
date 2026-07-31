@@ -28,6 +28,8 @@ class EntryType(db.Model):
 
     name = db.Column(db.String(80), unique=True, nullable=False)
 
+    max_per_day = db.Column(db.Integer, unique=False, nullable=False)
+
     created_at = db.Column(db.DateTime, default=datetime.datetime.now, nullable=False)
 
     # one type, many entries

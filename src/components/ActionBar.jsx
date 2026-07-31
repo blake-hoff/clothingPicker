@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import {Box, IconButton, TextField, InputLabel, FormControl, Select, MenuItem} from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import AddBoxIcon from '@mui/icons-material/AddBox';
@@ -21,34 +21,37 @@ function ActionBar({
     selectedDate,
     setSelectedDate,
     createEntry,
+	entryValue,
+	setEntryValue,
+	entryName,
+	setEntryName,
 	typeData,
 	selectedType,
 	setSelectedType
 	}) {
-	
-	const [entryValue, setEntryValue] = useState('');
-	// const [selectedType, setSelectedType] = useState('Outfit');
+		useEffect(() => {
+			const existingEntry = gridData.find(item => { // looking at all items in the grid, do some tests, 
+			// if its true then set existing entry to this item, false (catch) then skip to the next element in the grid.
+				try{
+					const getServerDate = new Date(item.date).toISOString().split("T")[0]; // the server date has been formatted to a string.
+					const getServerType = typeData[item.type_id-1].name; // a particular item in the grids type.
+					// console.log('type', getServerType, selectedType, getServerType === selectedType);
 
-	useEffect(() => {
-		const existingEntry = gridData.find(item => { // looking at all items in the grid, do some tests, 
-		// if its true then set existing entry to this item, false (catch) then skip to the next element in the grid.
-			try{
-				const getServerDate = new Date(item.date).toISOString().split("T")[0]; // the server date has been formatted to a string.
-				const getServerType = typeData[item.type_id-1].name; // a particular item in the grids type.
-				// console.log('type', getServerType, selectedType, getServerType === selectedType);
 
-				return getServerDate === selectedDate.format("YYYY-MM-DD") && getServerType === selectedType;
-				
-				// selectedDate is in datejs format, needs to be back to a string to compare to the grid (server) date
-				// also need to make sure that the clients selected type matches this particular items type.
-				// if both (and &&) match (===), it will return true.
-			}catch{
-				return false;
-			}
-		});
-	
-		setEntryValue(existingEntry ? existingEntry.description : '');
-	}, [selectedDate, selectedType, gridData, typeData]);
+					return getServerDate === selectedDate.format("YYYY-MM-DD") && getServerType === selectedType;
+					// return getServerDate === selectedDate.format("YYYY-MM-DD") && getServerType === selectedType && !(entryName === item.name);
+					
+					// selectedDate is in datejs format, needs to be back to a string to compare to the grid (server) date
+					// also need to make sure that the clients selected type matches this particular items type.
+					// if both (and &&) match (===), it will return true.
+				}catch{
+					return false;
+				}
+			});
+		
+			setEntryValue(existingEntry ? existingEntry.description : '');
+			setEntryName(existingEntry ? existingEntry.name : '');
+		}, [selectedDate, selectedType, gridData, typeData, setEntryValue, setEntryName]);
 
     return (
 
@@ -178,9 +181,35 @@ function ActionBar({
 				}}
 			/>
 
+			<TextField 
+				id="outlined-controlled" 
+				label={"Enter Name Here"}
+				value={entryName} 
+				onChange={(event) => {setEntryName(event.target.value);}}
+
+				sx={{"& .MuiOutlinedInput-root": 
+						{color: "#afc8fb","& fieldset": {borderColor: "#4f86f8",},
+
+						"&:hover fieldset": {
+						borderColor: "#afc8fb", 
+						borderWidth: "3px",
+						},
+
+						"&.Mui-focused fieldset": {
+						borderColor: "#4f86f8",
+						borderWidth: "4px",
+						},
+					},
+
+					"& .MuiInputLabel-root": {
+						color: "#afc8fb",
+					},
+				}}
+			/>
+
 			{/* enter */}
 			<Tooltip title="Enter" arrow>
-				<IconButton onClick={() => createEntry(entryValue, selectedDate, selectedType)} variant="contained" color="primary" sx={{ padding: '16px' }}>
+				<IconButton onClick={() => createEntry(entryValue, selectedDate, selectedType, entryName)} variant="contained" color="primary" sx={{ padding: '16px' }}>
 					<AddBoxIcon sx={{ fontSize: 32 }}/>
 				</IconButton>
 			</Tooltip>

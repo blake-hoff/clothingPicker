@@ -32,6 +32,9 @@ const App = () => {
 	
 	const [typeData, setTypeData] = useState([]); // array of {name, created_at} (use [id-1] to access a particular id; ids start at 1)
 	const [selectedType, setSelectedType] = useState('Outfit');
+
+	const [entryValue, setEntryValue] = useState('');
+	const [entryName, setEntryName] = useState('');
 	
 	// selected date (default = today)
 	const [selectedDate, setSelectedDate] = useState(dayjs());
@@ -111,64 +114,49 @@ const App = () => {
 		}
 	}, [handleGetAll, link]);
 
-	const handleDeleteItem = async (id) => {
+	const handleEditItem = React.useCallback(async (item_date, item_type, item_name, item_desc) => {
 		try {
-			const outputDelete = await deleteItem(id);
-			console.log(outputDelete)
-			handleGetAll(); // retrieve the updated grid after deletion.
-		}
-		catch (err) {
-			console.error(err);
-		}
-	};
-
-	// delete one item of id
-	async function deleteItem(id) {
-		// console.log(id);
-		let path = '/item/' + id
-		let url = link + path
-		console.log(url)
-
-		try{
-			const response = await fetch(url, {method: "DELETE", credentials: 'include'});
-			const text = await response.text();
-			const cleanText = text.replace(/:NaN/g, ':null');
-			const newData = JSON.parse(cleanText);
-
-			console.log(newData)
-			// return newData.item
-        }
-		catch (err) {
-			console.log("Something went wrong!", err);
-			alert(err);
-			return null;
-		}
-	}
-
-	const handleEditItem = async (item_date, item_type) => {
-		try {
-
-			// update the selectedDate, which will automatically notice that the description is different.
-
-			// console.log(item_date);
 			const stringDate = new Date(item_date).toISOString().split("T")[0];
 			setSelectedDate(dayjs(stringDate)); // the calendar component needs the date to be in datejs format
 			setSelectedType(item_type);
-			// handleGetAll();
+			setEntryName(item_name);
+			setEntryValue(item_desc);
 		}
 		catch (err) {
 			console.error(err);
 		}
-	};
+	}, []);
 
-	const createEntry = async (entryValue, selectedDate, selectedType) => {
+	const handleDeleteItem = React.useCallback(async (id) => {
+			let path = '/item/' + id
+			let url = link + path
+			console.log(url)
+
+			try{
+				const response = await fetch(url, {method: "DELETE", credentials: 'include'});
+				const text = await response.text();
+				const cleanText = text.replace(/:NaN/g, ':null');
+				const newData = JSON.parse(cleanText);
+
+				console.log(newData)
+			}
+			catch (err) {
+				console.error("Something went wrong!", err);
+				alert(err);
+				return null;
+			}
+			handleGetAll(); // retrieve the updated grid after deletion.
+	}, [handleGetAll, link]);
+
+	const createEntry = async (entryValue, selectedDate, selectedType, selectedName) => {
 		let path = '/create/';
 		let url = link + path;
 
 		const payload = {
 			description: entryValue,
 			date: selectedDate.format('YYYY-MM-DD'), // format the date in a simple string for the server.
-			type_name: selectedType
+			type_name: selectedType,
+			entry_name: selectedName
 		};
 		try {
 			// send the value in the text field to the server
@@ -331,6 +319,10 @@ const App = () => {
 			setSelectedDate={setSelectedDate}
 			createEntry={createEntry}
 			gridData={gridData}
+			entryValue={entryValue}
+			setEntryValue={setEntryValue}
+			entryName={entryName}
+			setEntryName={setEntryName}
 			typeData={typeData}
 			selectedType={selectedType}
 			setSelectedType={setSelectedType}
@@ -342,9 +334,9 @@ const App = () => {
 			<ItemGrid
 			gridData={gridData}
 			formatDate={formatDate}
-			handleEditItem={handleEditItem}
 			handleDeleteItem={handleDeleteItem}
 			typeData={typeData}
+			handleEditItem={handleEditItem}
 			/>
 		</div>}
 		

@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Button, IconButton } from '@mui/material';
+import { IconButton } from '@mui/material';
 import {Grid, Card, CardContent, Typography, Box} from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
@@ -8,9 +8,9 @@ import EditIcon from '@mui/icons-material/Edit';
 function ItemGrid({
     gridData,
     formatDate,
-    handleEditItem,
     handleDeleteItem,
-    typeData // using the id from gridData for a specific item, get the name of the type and the created_at
+    typeData, // using the id from gridData for a specific item, get the name of the type and the created_at
+    handleEditItem
     }) {
     return (
     <Box sx={{ width: '99vw'}}>
@@ -52,7 +52,9 @@ function ItemGrid({
                             
                             <Grid sx={{ width: "8%", justifyContent: "flex-end"}}>
                                 <Box sx={{ display: "flex", gap: 0, mt: 1, justifyContent: "flex-start", backgroundColor: '#3e4132',   borderRadius: '10px'}}>
-                                    <IconButton variant="contained" color="info" size="small" onClick={() => handleEditItem(item.date, typeData[item.type_id-1].name)}>
+                                    <IconButton 
+                                        variant="contained" color="info" size="small" 
+                                        onClick={() => handleEditItem(item.date, typeData[item.type_id-1].name, item.name, item.description)}>
                                         <EditIcon/>
                                     </IconButton>
 
@@ -73,4 +75,4 @@ function ItemGrid({
     );
 }
 
-export default ItemGrid;
+export default React.memo(ItemGrid);

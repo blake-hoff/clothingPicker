@@ -87,33 +87,53 @@ def create_entry():
         
     usersDesc = data.get("description") # get user description from payload
     userDate = data.get("date") # get user date from payload
-    userDateAsDT = datetime.fromisoformat(userDate)
-    # convert the string given by user (in iso format) to a python datetime object
-    
+    userDateAsDT = datetime.fromisoformat(userDate) # convert the string given by user (in iso format) to a python datetime object
+    usersEntryName = data.get("entry_name")
+
+# type information-----
     usersTypeName = data.get("type_name") # get users type name from payload    
     # retrieve the entry if an entry has been created for the given date from the user.
     old_type = EntryType.query.filter_by(name=usersTypeName).first()
 
     selectedTypeID = old_type.id
-    selectedName = old_type.name # todo: change to what the user submits (likely will be named outfit for outfit type; user can choose for other types.)
+    selectedTypeName = old_type.name # todo: change to what the user submits (likely will be named outfit for outfit type; user can choose for other types.)
+    selectedTypeMax = old_type.max_per_day
+    print(selectedTypeMax)
+
+    entryName = ''
+    # if the entry name contains the type name, set the entry name to the type name.
+    if usersTypeName.lower() in usersEntryName.lower():
+        entryName = usersTypeName
+    else:
+        entryName = usersEntryName
+
     
-    # retrieve the entry if an entry has been created for the given date from the user.
-    old_entry = Entry.query.filter_by(user_id=userID, entry_date=userDateAsDT, type_id=selectedTypeID).first()
+    # retrieve the entry list matching the:
+    #  usersId,
+    #  entry date,
+    #  type
+    # get the length of this entry list called entry_list_length
+    # if entry_list_length > selectedTypeMax, do not allow an entry to be created, since the max entries have been created for today, for this type, for this user.
+    # otherwise, allow an entry to be created.
+
+    entry_list = Entry.query.filter_by(user_id=userID, entry_date=userDateAsDT, type_id=selectedTypeID).all()
+    entry_list_length = len(entry_list)
+    # entry_list_length = 1
+    print(entry_list)
+    print(entry_list_length)
 
     # if the entry already exists, should be updated with the new version
-    if old_entry:
-        old_entry.description = usersDesc
-        db.session.commit()
+    # if old_entry:
+    #     old_entry.description = usersDesc
+    #     db.session.commit()
 
-        # print(old_entry.id)
-        return jsonify({
-            'success': True,
-            'message': f'Updated entry description because an entry did exist for date {userDate}.'
-        }), 200
+    #     # print(old_entry.id)
+    #     return jsonify({
+    #         'success': True,
+    #         'message': f'Updated entry description because an entry did exist for date {userDate}.'
+    #     }), 200
 
-
-    # if it is not in the database it can be added simply.
-    else:
+    if entry_list_length < selectedTypeMax:
         print(f'date time today {date.today()}')
         print(f'date time payload {userDate} {type(userDate)}')
         print(f'date time converted {userDateAsDT}')
@@ -126,7 +146,7 @@ def create_entry():
                         entry_date=userDateAsDT,
                         user_id=userID,
                         type_id=selectedTypeID,
-                        name=selectedName
+                        name=entryName
                        )
         db.session.add(entry)
         db.session.commit()
@@ -134,6 +154,12 @@ def create_entry():
         return jsonify({
             'success': True,
             'message': f'Created new entry because an entry did not exist for date {userDate}.'
+        }), 200
+    
+    else: # too many entries for this day.
+        return jsonify({
+            'success': False,
+            'message': f'Could not create a new entry because the max entries has been reached.'
         }), 200
 
 
@@ -235,7 +261,7 @@ def create_entry_type():
         userID = session.get("user_id")
         print(userID)
 
-        entry = EntryType(name=usersTypeName)
+        entry = EntryType(name=usersTypeName, max_per_day=3)
         db.session.add(entry)
         db.session.commit()
 
