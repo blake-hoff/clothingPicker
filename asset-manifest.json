@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/clothingPicker/static/css/main.f855e6bc.css",
-    "main.js": "/clothingPicker/static/js/main.8f4d005d.js",
+    "main.css": "/clothingPicker/static/css/main.f679c91f.css",
+    "main.js": "/clothingPicker/static/js/main.06a4a228.js",
     "static/js/453.63309ceb.chunk.js": "/clothingPicker/static/js/453.63309ceb.chunk.js",
     "index.html": "/clothingPicker/index.html",
-    "main.f855e6bc.css.map": "/clothingPicker/static/css/main.f855e6bc.css.map",
-    "main.8f4d005d.js.map": "/clothingPicker/static/js/main.8f4d005d.js.map",
+    "main.f679c91f.css.map": "/clothingPicker/static/css/main.f679c91f.css.map",
+    "main.06a4a228.js.map": "/clothingPicker/static/js/main.06a4a228.js.map",
     "453.63309ceb.chunk.js.map": "/clothingPicker/static/js/453.63309ceb.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.f855e6bc.css",
-    "static/js/main.8f4d005d.js"
+    "static/css/main.f679c91f.css",
+    "static/js/main.06a4a228.js"
   ]
 }
