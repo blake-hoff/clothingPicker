@@ -42,7 +42,8 @@ const App = () => {
 	
 	// site title passed into various components.
 	const siteTitle = "CloTrack"
-	let link = 'http://localhost:5000/api'
+	// let link = 'http://localhost:5000/api'
+	let link = 'https://blakehoff.pythonanywhere.com/api'
 
 
 	// populating the grid

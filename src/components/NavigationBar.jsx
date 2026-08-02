@@ -17,9 +17,9 @@ function NavigationBar({title, loggedIn, handleLogout}) {
 						{title}
 					</Typography>
 
-					<IconButton onClick={() => handleLogout()} variant="contained" color="primary">
-						{loggedIn ? "Log out" : ""}
-					</IconButton>
+					{loggedIn === 1 && <IconButton onClick={() => handleLogout()} variant="contained" color="primary">
+						{"Log out"}
+					</IconButton>}
 
 				</Box>
 			</Toolbar>

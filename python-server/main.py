@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__) # for error logging
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY')
-CORS(app, supports_credentials=True, origins=["http://localhost:3000"])  # Enables CORS to allow requests from the React frontend
+CORS(app, supports_credentials=True, origins=["https://blake-hoff.github.io"])  # Enables CORS to allow requests from the React frontend
 print(app.url_map)
 
 # Configure SQLAlchemy
