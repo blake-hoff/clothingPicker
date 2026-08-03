@@ -37,9 +37,11 @@ function ItemGrid({
                                     {/* otherwise, */}
                                     {/* set the text to the format 'type - name' */}
 
-                                    {((((typeData[item.type_id - 1]).name) === (item.name)) || (item.name).includes(((typeData[item.type_id - 1]).name))) 
-                                    ?
-                                    (item.name) : (((typeData[item.type_id - 1]).name) + ' - ' + (item.name))}
+                                    {typeData && typeData[item.type_id - 1] ? (
+                                        ((typeData[item.type_id - 1].name === item.name) || item.name.includes(typeData[item.type_id - 1].name)) 
+                                        ? (item.name) 
+                                        : (`${typeData[item.type_id - 1].name} - ${item.name}`)
+                                    ) : ("Loading...")}
                                 </Typography>
                                 
                             </Grid>
