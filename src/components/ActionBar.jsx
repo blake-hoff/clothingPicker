@@ -33,15 +33,12 @@ function ActionBar({
 			const existingEntry = gridData.find(item => { // looking at all items in the grid, do some tests, 
 			// if its true then set existing entry to this item, false (catch) then skip to the next element in the grid.
 				try{
-					const getServerDate = new Date(item.date).toISOString().split("T")[0]; // the server date has been formatted to a string.
-					const getServerType = typeData[item.type_id-1].name; // a particular item in the grids type.
-					// console.log('type', getServerType, selectedType, getServerType === selectedType);
+					const getGridItemDate = new Date(item.date).toISOString().split("T")[0]; // the server date has been formatted to a string.
+					const getGridItemType = typeData[item.type_id-1].name; // a particular item in the grids type.
 
-
-					return getServerDate === selectedDate.format("YYYY-MM-DD") && getServerType === selectedType;
-					// return getServerDate === selectedDate.format("YYYY-MM-DD") && getServerType === selectedType && !(entryName === item.name);
+					return getGridItemDate === selectedDate.format("YYYY-MM-DD") && getGridItemType === selectedType;
 					
-					// selectedDate is in datejs format, needs to be back to a string to compare to the grid (server) date
+					// selectedDate is in datejs format, needs to be string to compare to the grid (server) date
 					// also need to make sure that the clients selected type matches this particular items type.
 					// if both (and &&) match (===), it will return true.
 				}catch{
@@ -51,13 +48,12 @@ function ActionBar({
 		
 			setEntryValue(existingEntry ? existingEntry.description : '');
 			setEntryName(existingEntry ? existingEntry.name : '');
-		}, [selectedDate, selectedType, gridData, typeData, setEntryValue, setEntryName]);
+		}, [selectedDate, selectedType, gridData]);
 
     return (
 
 		<Box sx={{position: "static", width: "100%", display: "flex", alignItems: "center", gap: 2, padding: 2, borderBottom: "5px solid rgba(255,255,255,0.2)"}}>
 			{/* refresh button */}
-
 			<Tooltip title="Reload" arrow>
 				<IconButton onClick={handleGetAll} sx={{backgroundColor: "secondary.main", color: "white", "&:hover": { backgroundColor: "secondary.dark" }}}>
 					<RefreshIcon />
@@ -80,22 +76,19 @@ function ActionBar({
 					color: "#afc8fb",
 				},
 				}}>
-			
-				<DatePicker
-					label="Select Outfit Date"
-					value={selectedDate}
-					onChange={(newDate) => setSelectedDate(dayjs(newDate))}
-					slotProps={{ 
-						textField: { 
-						size: 'small',
-						fullWidth: true // match input width to container
-						} 
-					}} 
-					
-				/>
-	
+					<DatePicker
+						label="Select Outfit Date"
+						value={selectedDate}
+						onChange={(newDate) => setSelectedDate(dayjs(newDate))}
+						slotProps={{ 
+							textField: { 
+							size: 'small',
+							fullWidth: true // match input width to container
+							} 
+						}} 
+					/>
 				</Box>
-				
+
 				<Tooltip title="Jump to Today" arrow>
 					<IconButton onClick={() => setSelectedDate(dayjs(new Date()))} variant="contained" color="primary" sx={{ padding: '1px' }}>
 						<EventRepeatIcon sx={{ fontSize: 32 }}/>

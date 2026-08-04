@@ -33,6 +33,8 @@ const App = () => {
 	const [typeData, setTypeData] = useState([]); // array of {name, created_at} (use [id-1] to access a particular id; ids start at 1)
 	const [selectedType, setSelectedType] = useState('Outfit');
 
+	const [selectedID, setSelectedID] = useState(-1); // stores the ID that will be used for editing
+
 	const [entryValue, setEntryValue] = useState('');
 	const [entryName, setEntryName] = useState('');
 	
@@ -115,7 +117,7 @@ const App = () => {
 		}
 	}, [handleGetAll, link]);
 
-	const handleEditItem = React.useCallback(async (item_date, item_type, item_name, item_desc) => {
+	const loadActionFields = React.useCallback(async (item_date, item_type, item_name, item_desc) => {
 		try {
 			const stringDate = new Date(item_date).toISOString().split("T")[0];
 			setSelectedDate(dayjs(stringDate)); // the calendar component needs the date to be in datejs format
@@ -304,42 +306,45 @@ const App = () => {
   return (
     <div className="App">
 		
-		<div>
-			<NavigationBar title={siteTitle} loggedIn={loggedIn} handleLogout={handleLogout} />
+		<NavigationBar 
+			title={siteTitle}
+			loggedIn={loggedIn}
+			handleLogout={handleLogout} 
+		/>
 
-		</div>
-
-		{loggedIn === 0 && <div>
-			<LoginPage title={siteTitle} handleSignUp={handleSignUp} handleLogin={handleLogin}/>
-			</div>}
+		{loggedIn === 0 &&
+			<LoginPage 
+				title={siteTitle} 
+				handleSignUp={handleSignUp} 
+				handleLogin={handleLogin}
+			/>
+		}
 
 		{loggedIn === 1 && <div>
 			<ActionBar 
-			handleGetAll={handleGetAll}
-			selectedDate={selectedDate}
-			setSelectedDate={setSelectedDate}
-			createEntry={createEntry}
-			gridData={gridData}
-			entryValue={entryValue}
-			setEntryValue={setEntryValue}
-			entryName={entryName}
-			setEntryName={setEntryName}
-			typeData={typeData}
-			selectedType={selectedType}
-			setSelectedType={setSelectedType}
+				handleGetAll={handleGetAll}
+				selectedDate={selectedDate}
+				setSelectedDate={setSelectedDate}
+				createEntry={createEntry}
+				gridData={gridData}
+				entryValue={entryValue}
+				setEntryValue={setEntryValue}
+				entryName={entryName}
+				setEntryName={setEntryName}
+				typeData={typeData}
+				selectedType={selectedType}
+				setSelectedType={setSelectedType}
 			/>
-
-
-
 
 			<ItemGrid
-			gridData={gridData}
-			formatDate={formatDate}
-			handleDeleteItem={handleDeleteItem}
-			typeData={typeData}
-			handleEditItem={handleEditItem}
+				gridData={gridData}
+				formatDate={formatDate}
+				handleDeleteItem={handleDeleteItem}
+				typeData={typeData}
+				loadActionFields={loadActionFields}
 			/>
-		</div>}
+		</div>
+		}
 		
     </div>
   );

@@ -10,7 +10,7 @@ function ItemGrid({
     formatDate,
     handleDeleteItem,
     typeData, // using the id from gridData for a specific item, get the name of the type and the created_at
-    handleEditItem
+    loadActionFields
     }) {
     return (
     <Box sx={{ width: '99vw'}}>
@@ -56,7 +56,7 @@ function ItemGrid({
                                 <Box sx={{ display: "flex", gap: 0, mt: 1, justifyContent: "flex-start", backgroundColor: '#3e4132',   borderRadius: '10px'}}>
                                     <IconButton 
                                         variant="contained" color="info" size="small" 
-                                        onClick={() => handleEditItem(item.date, typeData[item.type_id-1].name, item.name, item.description)}>
+                                        onClick={() => loadActionFields(item.date, typeData[item.type_id-1].name, item.name, item.description)}>
                                         <EditIcon/>
                                     </IconButton>
 

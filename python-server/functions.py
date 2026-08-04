@@ -1,5 +1,6 @@
 from datetime import date, datetime
 from email_validator import validate_email, EmailNotValidError
+import re
 
 def invalidUserParamaters(username, password, email='name@email.net'):
     # print(username, email, password)
@@ -16,6 +17,16 @@ def invalidUserParamaters(username, password, email='name@email.net'):
     
     return False, 'Valid user parameters'
 
+def invalidText(text):
+    cleaned = text.strip()
+
+    # place all characters into a list
+    alphas = re.findall(r'[a-zA-Z0-9]', cleaned)
+    
+    if(len(alphas) >= 3): # Valid with at least 3 regular characters.
+        return True   
+    else:
+        return False
 
 # local data import functions
 def ensureTwoDigits(inputDigit):

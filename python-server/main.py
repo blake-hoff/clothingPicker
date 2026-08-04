@@ -8,7 +8,7 @@ from flask_cors import CORS
 from flask_migrate import Migrate
 
 from database import db, Entry, EntryType, User
-from functions import invalidUserParamaters
+from functions import invalidUserParamaters, invalidText
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 from dotenv import load_dotenv
@@ -51,7 +51,6 @@ def get_all_items():
             "error": "Unauthorized user."
         }), 401
 
-
     items = Entry.query.filter_by(user_id=userID).order_by(Entry.entry_date.desc())
 
     return jsonify({
@@ -67,18 +66,15 @@ def get_all_items():
         'date': date.today() # extra info for frontend to know the date from the server.
     }), 200
 
-# Create an entry in the database
+# Create an entry
 @app.route('/api/create/', methods=['POST'])
 def create_entry():
     # 1. ensure the request is safe to read from,
     # read the request, split up the values into variables here.
-    
-
     data = request.get_json() # data sent from the user frontend
     print(data)
     
     userID = session.get("user_id") # user id sent by user
-
 
     if not data:
         return jsonify({
@@ -91,56 +87,45 @@ def create_entry():
     userDateAsDT = datetime.fromisoformat(userDate) # convert the string given by user (in iso format) to a python datetime object
     usersEntryName = data.get("entry_name")
 
-# type information-----
+    ## ---------- Type Information ---------- ##
     usersTypeName = data.get("type_name") # get users type name from payload    
     # retrieve the entry if an entry has been created for the given date from the user.
-    old_type = EntryType.query.filter_by(name=usersTypeName).first()
+    # the submitted type name will always be unique as per the db schema, and the create endpoint.
+    query_type = EntryType.query.filter_by(name=usersTypeName).first()
 
-    selectedTypeID = old_type.id
-    selectedTypeName = old_type.name # todo: change to what the user submits (likely will be named outfit for outfit type; user can choose for other types.)
-    selectedTypeMax = old_type.max_per_day
+    selectedTypeID = query_type.id # will be unique 
+    selectedTypeName = query_type.name
+    selectedTypeMax = query_type.max_per_day
     print(selectedTypeMax)
 
     entryName = ''
-    # if the entry name contains the type name, set the entry name to the type name.
-    if usersTypeName.lower() in usersEntryName.lower():
+    # if the user submitted entry name:
+    #  is blank or contains less than three text characters in it.
+    #  or
+    #  contains the type name,
+    #  set the entry name to the type name.
+    if invalidText(usersEntryName) or (usersTypeName.lower() in usersEntryName.lower()):
         entryName = usersTypeName
-    else:
+    else: # only use the users submitted name if it is valid and the type name does not exist in it.
         entryName = usersEntryName
 
     
-    # retrieve the entry list matching the:
+    # retrieve the database entries matching:
     #  usersId,
     #  entry date,
     #  type
     # get the length of this entry list called entry_list_length
     # if entry_list_length > selectedTypeMax, do not allow an entry to be created, since the max entries have been created for today, for this type, for this user.
     # otherwise, allow an entry to be created.
-
     entry_list = Entry.query.filter_by(user_id=userID, entry_date=userDateAsDT, type_id=selectedTypeID).all()
     entry_list_length = len(entry_list)
-    # entry_list_length = 1
     print(entry_list)
     print(entry_list_length)
-
-    # if the entry already exists, should be updated with the new version
-    # if old_entry:
-    #     old_entry.description = usersDesc
-    #     db.session.commit()
-
-    #     # print(old_entry.id)
-    #     return jsonify({
-    #         'success': True,
-    #         'message': f'Updated entry description because an entry did exist for date {userDate}.'
-    #     }), 200
 
     if entry_list_length < selectedTypeMax:
         print(f'date time today {date.today()}')
         print(f'date time payload {userDate} {type(userDate)}')
         print(f'date time converted {userDateAsDT}')
-        # add to database
-        userID = session.get("user_id")
-        print(userID)
 
         entry = Entry(description=usersDesc,
                         icon='https://images.unsplash.com/vector-1775556825284-3b697bc284bf?q=80&w=1480&auto=format&fit=crop&ixlib=rb-4.1.0',
@@ -163,12 +148,90 @@ def create_entry():
             'message': f'Could not create a new entry because the max entries has been reached.'
         }), 200
 
+# Update an entry
+@app.route('/api/update/<int:entry_id>', methods=['POST'])
+def update_entry(entry_id):
+    data = request.get_json() # data sent from the user frontend
 
+    userID = session.get("user_id") # user id sent by user
 
-@app.route('/api/item/<int:item_id>', methods=['DELETE'])
-def delete_entry(item_id):
+    if not data:
+        return jsonify({
+            'success': False,
+            "error": "Missing JSON payload"
+        }), 400
+
+    if not userID:
+        return jsonify({
+            'success': False,
+            "error": "Missing authentication. Must be logged in to complete this action."
+        }), 400
+
+    ## ---------- Entry Information ---------- ##
+    usersDesc = data.get("description") # get user description from payload
+    userDate = data.get("date") # get user date from payload
+    userDateAsDt = ''
+    try:
+        userDateAsDT = datetime.fromisoformat(userDate) # convert the string given by user (in iso format) to a python datetime object
+    except:
+        return jsonify({
+            'success': False,
+            "error": f"Date out of range."
+        }), 400
+
+    usersEntryName = data.get("entry_name")
+
+    ## ---------- Type Information ---------- ##
+    usersTypeName = data.get("type_name") # get users type name from payload
+    # the submitted type name will always be unique as per the db schema, and the create endpoint.
+    query_type = EntryType.query.filter_by(name=usersTypeName).first()
+    if not query_type:
+        return jsonify({
+            'success': False,
+            "error": f"Could not find a type with name: {usersTypeName}."
+        }), 400
+
+    selectedTypeID = query_type.id
+
+    entryName = ''
+    # if the user submitted entry name:
+    #  is blank or contains less than three text characters in it.
+    #  or
+    #  contains the type name,
+    #  set the entry name to the type name.
+    if invalidText(usersEntryName) or (usersTypeName.lower() in usersEntryName.lower()):
+        entryName = usersTypeName
+    else: # only use the users submitted name if it is valid and the type name does not exist in it.
+        entryName = usersEntryName
+    
+    # retrieve the database entry with the exact same primary ID
+    selected_entry = Entry.query.filter_by(id=entry_id).first()
+    print(selected_entry)
+
+    # if the entry was found by the primary ID
+    if selected_entry:
+        selected_entry.name = entryName
+        selected_entry.description = usersDesc
+        selected_entry.entry_date = userDateAsDT
+        selected_entry.type_id = selectedTypeID
+
+        db.session.add(selected_entry)
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': f'Updated entry.'
+        }), 200
+    else:
+        return jsonify({
+            'success': False,
+            'message': f'An entryType with name {usersTypeName} did not exist.'
+        }), 400
+
+@app.route('/api/item/<int:entry_id>', methods=['DELETE'])
+def delete_entry(entry_id):
     # see if it is in the backends database already.
-    outfitEntry = Entry.query.filter_by(id=item_id).first()
+    outfitEntry = Entry.query.filter_by(id=entry_id).first()
 
     # the user id of the database entry must match the session user id.
     outfitUserID = outfitEntry.user_id
@@ -185,7 +248,7 @@ def delete_entry(item_id):
     if not outfitEntry:
         return jsonify({
             'success': False,
-            'message': f'Item with id \"{item_id}\" not found'
+            'message': f'Item with id \"{entry_id}\" not found'
         }), 404
     
     # use a try statement for a database operation that could fail.
@@ -201,14 +264,12 @@ def delete_entry(item_id):
     
     except Exception as e:
         db.session.rollback()
-        logger.error(f"Could not delete item {item_id}: {str(e)}") # log error
+        logger.error(f"Could not delete item {entry_id}: {str(e)}") # log error
 
-# type apis
-
-# get all rows of types in the database
+## ---------- Type APIs ---------- ##
+# Get all rows of types
 @app.route('/api/types/', methods=['GET'])
 def get_all_types():
-    # Get all types in the database
     userID = session.get("user_id")
 
     if userID is None:
@@ -217,9 +278,7 @@ def get_all_types():
             "error": "Unauthorized user."
         }), 401
 
-
-    types = EntryType.query
-    
+    types = EntryType.query    
 
     return jsonify({
         'success': True,
@@ -246,19 +305,16 @@ def create_entry_type():
     usersTypeName = data.get("name") # get users type name from payload
     
     # retrieve the entry if an entry has been created for the given date from the user.
-    old_type = EntryType.query.filter_by(name=usersTypeName).first()
+    query_type = EntryType.query.filter_by(name=usersTypeName).first()
 
     # if the type already exists
-    if old_type:
+    if query_type:
         return jsonify({
             'success': False,
             'message': f'Entry type already exists with name {usersTypeName}.'
         }), 200
 
-
-    # if it is not in the database it can be added.
-    else:
-        # add to database
+    else: # add to database
         userID = session.get("user_id")
         print(userID)
 
@@ -289,11 +345,11 @@ def update_entry_type():
     usersTypeID = data.get("type_id")
     
     # retrieve the entry if an entry has been created for the given date from the user.
-    old_type = EntryType.query.filter_by(id=usersTypeID).first()
+    query_type = EntryType.query.filter_by(id=usersTypeID).first()
 
     # if the type already exists, must update with new information
-    if old_type and old_type.name != usersTypeName:
-        old_type.name = usersTypeName
+    if query_type and query_type.name != usersTypeName:
+        query_type.name = usersTypeName
         db.session.commit()
 
         return jsonify({
@@ -301,20 +357,16 @@ def update_entry_type():
             'message': f'Updated TntryType name because an EntryType did exist with name {usersTypeName}.'
         }), 200
 
-
-    # if it is not in the database return an error.
-    else:
+    else:     # if it is not in the database return an error.
         return jsonify({
             'success': False,
-            'message': f'An entryType with name {usersTypeName} did not exist.'
+            'message': f'The entryType at ID {usersTypeID} is already named {usersTypeName}.'
         }), 200
 
 # Update an entry in the type table
 @app.route('/api/types/delete/', methods=['DELETE'])
 def delete_entry_type():
     data = request.get_json() # data sent from the user frontend
-    # print(data)
-    
     userID = session.get("user_id") # user id sent by user
 
     if not data:
@@ -326,10 +378,10 @@ def delete_entry_type():
     usersTypeID = data.get("type_id")
     
     # retrieve the entry if an entry has been created for the given date from the user.
-    old_type = EntryType.query.filter_by(id=usersTypeID).first()
+    query_type = EntryType.query.filter_by(id=usersTypeID).first()
 
     # if it is not in the database, return client side error.
-    if not old_type:
+    if not query_type:
         return jsonify({
             'success': False,
             'message': f'Item with id \"{usersTypeID}\" not found'
@@ -338,7 +390,7 @@ def delete_entry_type():
     # use a try statement for a database operation that could fail.
     try:
         # attempt to delete the entry in the database 
-        db.session.delete(old_type)
+        db.session.delete(query_type)
         db.session.commit()
 
         return jsonify({

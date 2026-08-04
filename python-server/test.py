@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 
 # run this in the venv
-# then run with 'pytest test.py' -s
+# then run with 'pytest test.py -s'
 # the -s shows every print statement too.
 
 # Load variables from .env file into environment
@@ -55,6 +55,30 @@ def test_get_endpoint_valid(auth_client):
     assert response.status_code == 200
     assert response.json["success"] == True
 
+def test_update_entry_valid(auth_client):
+    id = 321
+    response = auth_client.post(f'/api/update/{id}', 
+                                json={"date": "2026-08-03", 
+                                    "entry_name": "good one",
+                                    "description" : "food",
+                                    "type_name": "Meal"
+                                    })
+    print(response.json)
+    assert response.status_code == 200
+    assert response.json["success"] == True
+
+def test_update_entry_invalid(auth_client):
+    id = 321
+    response = auth_client.post(f'/api/update/{id}', 
+                                json={"date": "2026-08-99", 
+                                    "entry_name": "good one",
+                                    "description" : "food",
+                                    "type_name": "not a type"
+                                    })
+    print(response.json)
+    assert response.status_code == 400
+    assert response.json["success"] == False
+
 def test_get_endpoint_invalid(client):
     response = client.get('/api/types/')
     # print(response)
@@ -62,7 +86,7 @@ def test_get_endpoint_invalid(client):
     assert response.json["success"] == False
 
 def test_create_type_invalid(auth_client):
-    response = auth_client.post('/api/types/create/', json={"name": "Outfit"})
+    response = auth_client.post('/api/types/create/', json={"name": "Meal"})
     print(response.json)
     assert response.status_code == 200
     assert response.json["success"] == False
