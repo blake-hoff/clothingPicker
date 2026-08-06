@@ -51,7 +51,7 @@ def get_all_items():
             "error": "Unauthorized user."
         }), 401
 
-    items = Entry.query.filter_by(user_id=userID).order_by(Entry.entry_date.desc())
+    items = Entry.query.filter_by(user_id=userID).order_by(Entry.id.desc())
 
     return jsonify({
         'success': True,
@@ -253,8 +253,9 @@ def delete_entry(entry_id):
     
     # use a try statement for a database operation that could fail.
     try:
-        # attempt to delete the entry in the database 
+        # delete the entry in the database by setting every value to null
         db.session.delete(outfitEntry)
+
         db.session.commit()
 
         return jsonify({
