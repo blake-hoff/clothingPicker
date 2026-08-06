@@ -27,7 +27,8 @@ function ActionBar({
 	setEntryName,
 	typeData,
 	selectedType,
-	setSelectedType
+	setSelectedType,
+	selectedID
 	}) {
 		useEffect(() => {
 			const existingEntry = gridData.find(item => { // looking at all items in the grid, do some tests, 
@@ -45,9 +46,12 @@ function ActionBar({
 					return false;
 				}
 			});
-		
-			setEntryValue(existingEntry ? existingEntry.description : '');
-			setEntryName(existingEntry ? existingEntry.name : '');
+
+			if(selectedID === -1){
+				setEntryValue(existingEntry ? existingEntry.description : '');
+				setEntryName(existingEntry ? existingEntry.name : '');
+			}
+			
 		}, [selectedDate, selectedType, gridData]);
 
     return (
@@ -111,7 +115,7 @@ function ActionBar({
 
 			<Box 
 				sx={{ 
-					width: '5vw',
+					width: '6vw',
 					display: 'flex', 
 					justifyContent: 'center', 
 					"& .MuiOutlinedInput-root": {
@@ -148,7 +152,7 @@ function ActionBar({
 			<TextField 
 				multiline
       			minRows={1}
-      			maxRows={6}
+      			maxRows={3}
 				id="outlined-controlled" 
 				label={"Enter " + selectedType + " Here"}
 				value={entryValue} 
@@ -211,4 +215,4 @@ function ActionBar({
 		);
 }
 
-export default ActionBar;
+export default React.memo(ActionBar);

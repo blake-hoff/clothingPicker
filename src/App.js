@@ -44,8 +44,8 @@ const App = () => {
 	
 	// site title passed into various components.
 	const siteTitle = "CloTrack"
-	// let link = 'http://localhost:5000/api'
-	let link = 'https://blakehoff.pythonanywhere.com/api'
+	let link = 'http://localhost:5000/api'
+	// let link = 'https://blakehoff.pythonanywhere.com/api'
 
 
 	// populating the grid
@@ -117,18 +117,64 @@ const App = () => {
 		}
 	}, [handleGetAll, link]);
 
-	const loadActionFields = React.useCallback(async (item_date, item_type, item_name, item_desc) => {
+	const handleSetID = React.useCallback(async (item_id, item_date, item_type, item_name, item_desc) => {
 		try {
 			const stringDate = new Date(item_date).toISOString().split("T")[0];
 			setSelectedDate(dayjs(stringDate)); // the calendar component needs the date to be in datejs format
 			setSelectedType(item_type);
-			setEntryName(item_name);
+			setEntryName(item_name); // can use the grid data since i have the id already.
 			setEntryValue(item_desc);
+			console.log(selectedID, item_id);
+			if(selectedID === item_id){
+				setSelectedID(-1);
+				setSelectedDate(dayjs());
+				// resetting the date auto resets the other fields in action bar.
+			}
+			else{
+				setSelectedID(item_id);
+			}	
 		}
 		catch (err) {
 			console.error(err);
 		}
-	}, []);
+	}, [selectedID]);
+
+	const handleEditItem = React.useCallback(async () => {
+		let path = '/update/' + selectedID;
+		let url = link + path;
+
+		const payload = {
+			description: entryValue,
+			date: selectedDate.format('YYYY-MM-DD'),
+			type_name: selectedType,
+			entry_name: entryName
+			};
+			try {
+				// send the value in the text field to the server
+				const response = await fetch(url, {
+					method: 'POST',
+					credentials: "include",
+					headers: {
+						'Content-Type': 'application/json', // Tells server to expect JSON
+						'Accept': 'application/json'        // Tells server client expects JSON back
+					},
+					body: JSON.stringify(payload)          // Converts object into a valid JSON string
+				});
+
+				if (!response.ok) {
+					throw new Error(`HTTP error! Status: ${response.status}`);
+				}
+
+				const responseData = await response.json(); // Parses returning JSON string to object
+				console.log('Success:', responseData);
+			}
+			catch (err) {
+				console.error("Something went wrong!", err);
+				alert(err);
+				return null;
+			}
+			handleGetAll(); // retrieve the updated grid after deletion.
+	}, [handleGetAll, link, entryName, selectedID, entryValue, selectedDate, selectedType]);
 
 	const handleDeleteItem = React.useCallback(async (id) => {
 			let path = '/item/' + id
@@ -137,11 +183,9 @@ const App = () => {
 
 			try{
 				const response = await fetch(url, {method: "DELETE", credentials: 'include'});
-				const text = await response.text();
-				const cleanText = text.replace(/:NaN/g, ':null');
-				const newData = JSON.parse(cleanText);
+				const data = await response.json();
 
-				console.log(newData)
+				console.log(data)
 			}
 			catch (err) {
 				console.error("Something went wrong!", err);
@@ -334,6 +378,8 @@ const App = () => {
 				typeData={typeData}
 				selectedType={selectedType}
 				setSelectedType={setSelectedType}
+				selectedID={selectedID}
+				setSelectedID={setSelectedID}
 			/>
 
 			<ItemGrid
@@ -341,7 +387,9 @@ const App = () => {
 				formatDate={formatDate}
 				handleDeleteItem={handleDeleteItem}
 				typeData={typeData}
-				loadActionFields={loadActionFields}
+				selectedID={selectedID}
+				handleSetID={handleSetID}
+				handleEditItem={handleEditItem}
 			/>
 		</div>
 		}

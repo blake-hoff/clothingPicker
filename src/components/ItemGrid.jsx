@@ -4,13 +4,18 @@ import { IconButton } from '@mui/material';
 import {Grid, Card, CardContent, Typography, Box} from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import Tooltip from '@mui/material/Tooltip';
 
 function ItemGrid({
     gridData,
     formatDate,
     handleDeleteItem,
     typeData, // using the id from gridData for a specific item, get the name of the type and the created_at
-    loadActionFields
+    selectedID,
+    handleSetID,
+    handleEditItem
     }) {
     return (
     <Box sx={{ width: '99vw'}}>
@@ -21,12 +26,26 @@ function ItemGrid({
             {gridData.map((item) => (
                 <Grid key={item.id} sx={{minWidth:0, width:"100%"}}>
                     <Card
-                    sx={{backgroundColor: "#3e4132", color: "white", width: "90%", mx: "auto", overflow: "hidden", height: "auto"}}>
+                        sx={{backgroundColor: item.id === selectedID ? "#5f883b": "#3e4132", color: "white", width: "90%", mx: "auto", overflow: "hidden", height: "auto"}}>
+        
                         <CardContent>
+                        
                             
-                            
-                        <Grid container spacing={2} alignItems="center">
-                            <Grid sx={{ width: "20%" }}>
+                        <Grid container spacing={1} alignItems="center">
+                            <Grid sx={{ ml:'auto', width: "3%" }}>
+                                <IconButton 
+                                    onClick={() => handleSetID(item.id, item.date, typeData[item.type_id-1].name, item.name, item.description)}
+                                    sx={{bgcolor:"#ffffff"}}
+                                    >
+                                    {item.id === selectedID ? 
+                                    <CheckCircleIcon/> 
+                                    : 
+                                    <RadioButtonUncheckedIcon/> }
+                                </IconButton>
+                                
+                            </Grid>
+
+                            <Grid sx={{  ml:'auto', width: "20%" }}>
                                 <Typography variant="h6">
                                     {formatDate(item.date)}
                                 </Typography>
@@ -46,23 +65,28 @@ function ItemGrid({
                                 
                             </Grid>
                             
-                            <Grid sx={{ width: "60%" }}>
+                            <Grid sx={{ mr:'auto', ml:'auto', width: "60%" }}>
                                 <Typography variant="body1" mt={1} sx={{wordBreak: "break-word", overflowWrap: "break-word", whiteSpace: "normal", display: "block"}}>
-                                    {item.description}
+                                    {item.description} id: {item.id}
                                 </Typography>
                             </Grid>
                             
-                            <Grid sx={{ width: "8%", justifyContent: "flex-end"}}>
-                                <Box sx={{ display: "flex", gap: 0, mt: 1, justifyContent: "flex-start", backgroundColor: '#3e4132',   borderRadius: '10px'}}>
-                                    <IconButton 
+                            <Grid sx={{mr:1, ml:'auto', width: "8%", justifyContent: "flex-end"}}>
+                                <Box sx={{ display: "flex", gap: 1, mt: 1, justifyContent: "center", backgroundColor:'#000000', borderRadius: '10px'}}>
+                                    {item.id === selectedID && <IconButton 
+                                        onClick={() => handleEditItem()}
                                         variant="contained" color="info" size="small" 
-                                        onClick={() => loadActionFields(item.date, typeData[item.type_id-1].name, item.name, item.description)}>
-                                        <EditIcon/>
-                                    </IconButton>
+                                        >
+                                        <Tooltip title="Edit Item" arrow>
+                                            <EditIcon/>
+                                        </Tooltip>
+                                    </IconButton>}
 
-                                    <IconButton variant="contained" color="error" size="small" onClick={() => handleDeleteItem(item.id)}>
-                                        <DeleteIcon />
-                                    </IconButton>
+                                    {item.id === selectedID && <IconButton variant="contained" color="error" size="small" onClick={() => handleDeleteItem(item.id)}>
+                                        <Tooltip title="Delete Item" arrow>
+                                            <DeleteIcon />
+                                        </Tooltip>
+                                    </IconButton>}
                                 </Box>
                             </Grid>
                         </Grid>
@@ -77,4 +101,4 @@ function ItemGrid({
     );
 }
 
-export default React.memo(ItemGrid);
+export default ItemGrid;

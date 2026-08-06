@@ -104,7 +104,7 @@ def create_entry():
     #  or
     #  contains the type name,
     #  set the entry name to the type name.
-    if invalidText(usersEntryName) or (usersTypeName.lower() in usersEntryName.lower()):
+    if not invalidText(usersEntryName) or (usersTypeName.lower() in usersEntryName.lower()):
         entryName = usersTypeName
     else: # only use the users submitted name if it is valid and the type name does not exist in it.
         entryName = usersEntryName
@@ -170,7 +170,7 @@ def update_entry(entry_id):
     ## ---------- Entry Information ---------- ##
     usersDesc = data.get("description") # get user description from payload
     userDate = data.get("date") # get user date from payload
-    userDateAsDt = ''
+    userDateAsDT = ''
     try:
         userDateAsDT = datetime.fromisoformat(userDate) # convert the string given by user (in iso format) to a python datetime object
     except:
@@ -199,7 +199,7 @@ def update_entry(entry_id):
     #  or
     #  contains the type name,
     #  set the entry name to the type name.
-    if invalidText(usersEntryName) or (usersTypeName.lower() in usersEntryName.lower()):
+    if not (usersEntryName) or (usersTypeName.lower() in usersEntryName.lower()):
         entryName = usersTypeName
     else: # only use the users submitted name if it is valid and the type name does not exist in it.
         entryName = usersEntryName

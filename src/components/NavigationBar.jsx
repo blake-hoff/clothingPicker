@@ -4,6 +4,7 @@ import {Typography, Box, AppBar, Toolbar} from '@mui/material';
 // misc buttons
 import { IconButton } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
+import Tooltip from '@mui/material/Tooltip';
 
 function NavigationBar({title, loggedIn, handleLogout}) {
     return (
@@ -19,14 +20,16 @@ function NavigationBar({title, loggedIn, handleLogout}) {
 					</Typography>
 
 					{loggedIn === 1 && 
-					<IconButton 
-						sx={{ ml: 'auto' }} 
-						onClick={() => handleLogout()} 
-						variant="contained" 
-						color="primary"
-					>
-						<LogoutIcon/>
-					</IconButton>}
+					<Tooltip title="Logout" arrow>
+						<IconButton 
+							sx={{ ml: 'auto' }} 
+							onClick={() => handleLogout()} 
+							variant="contained" 
+							color="primary"
+						>
+							<LogoutIcon/>
+						</IconButton>
+					</Tooltip>}
 
 				</Box>
 			</Toolbar>
