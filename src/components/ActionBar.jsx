@@ -212,6 +212,7 @@ function ActionBar({
 			</Tooltip>
 
 		</Box>
+		
 		);
 }
 

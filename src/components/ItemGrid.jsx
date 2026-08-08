@@ -67,7 +67,7 @@ function ItemGrid({
                             
                             <Grid sx={{ mr:'auto', ml:'auto', width: "60%" }}>
                                 <Typography variant="body1" mt={1} sx={{wordBreak: "break-word", overflowWrap: "break-word", whiteSpace: "normal", display: "block"}}>
-                                    {item.description} id: {item.id}
+                                    {item.description}
                                 </Typography>
                             </Grid>
                             
