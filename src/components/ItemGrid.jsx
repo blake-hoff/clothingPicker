@@ -21,7 +21,7 @@ function ItemGrid({
     <Box sx={{ width: '99vw'}}>
     <Grid container spacing={2} mt={4} justifyContent={'center'} 
         className="item-grid"
-        sx={{px: 4, pr: 4, maxHeight:'calc(80vh - 64px)', overflowY:'auto', alignContent:'flex-start'}}
+        sx={{px: 4, pr: 4, maxHeight:'calc(80vh - 80px)', overflowY:'scroll', alignContent:'flex-start'}}
         >
             {gridData.map((item) => (
                 <Grid key={item.id} sx={{minWidth:0, width:"100%"}}>

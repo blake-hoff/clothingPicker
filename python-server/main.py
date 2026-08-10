@@ -51,7 +51,7 @@ def get_all_items():
             "error": "Unauthorized user."
         }), 401
 
-    items = Entry.query.filter_by(user_id=userID).order_by(Entry.id.desc())
+    items = Entry.query.filter_by(user_id=userID).order_by(Entry.entry_date.desc())
 
     return jsonify({
         'success': True,

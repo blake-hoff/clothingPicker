@@ -28,6 +28,19 @@ const formatDate = (dateStr) => {
 };
 
 const App = () => {
+	// site title passed into various components.
+	const siteTitle = "CloTrack"
+
+	// urls passed into various states and functions.
+	let local_url = 'http://localhost:5000/api';
+	let python_anywhere_url = 'https://blakehoff.pythonanywhere.com/api';
+	let url_list = [
+		{"local5000": local_url},
+		{"pyAnywhere": python_anywhere_url}
+		];
+
+	const [server_url, set_server_url] = useState(python_anywhere_url);
+
     const [gridData, setGridData] = useState([]); // array of {id, type_id, name, icon, date, created_at, description}
 	
 	const [typeData, setTypeData] = useState([]); // array of {name, created_at} (use [id-1] to access a particular id; ids start at 1)
@@ -41,17 +54,12 @@ const App = () => {
 	// selected date (default = today)
 	const [selectedDate, setSelectedDate] = useState(dayjs());
 	const [loggedIn, setLoggedIn] = useState(-1); // set to -1 so neither loginpage or the user page is displayed until the server responds
-	
-	// site title passed into various components.
-	const siteTitle = "CloTrack"
-	// let link = 'http://localhost:5000/api'
-	let link = 'https://blakehoff.pythonanywhere.com/api'
 
 
 	// populating the grid
 	const getGridData = React.useCallback(async () => {
 		let path = '/view/';
-		let url = link + path;
+		let url = server_url + path;
 
 		try {
 			const response = await fetch(url, {credentials: 'include'}); // must be authorized user
@@ -64,12 +72,12 @@ const App = () => {
 		catch (err) {
 			console.log("Something went wrong!", err);
 		}
-	}, [link]);
+	}, [server_url]);
 
 	// populating the type data dropdown/filter
 	const getTypeData = React.useCallback(async () => {
 		let path = '/types/';
-		let url = link + path;
+		let url = server_url + path;
 
 		try {
 			const response = await fetch(url, {credentials: 'include'}); // must be authorized user
@@ -82,7 +90,7 @@ const App = () => {
 		catch (err) {
 			console.log("Something went wrong!", err);
 		}
-	}, [link]);
+	}, [server_url]);
 
 	const handleGetAll = React.useCallback(async () => {
 		try {
@@ -98,7 +106,7 @@ const App = () => {
 	const checkLogin = React.useCallback(async () => {
 	// async function checkLogin() {
 		let path = '/auth/user/';
-		let url = link + path;
+		let url = server_url + path;
 		
 		const response = await fetch(url, {credentials: "include"});
 
@@ -115,7 +123,7 @@ const App = () => {
 			setLoggedIn(0);
 			console.log("Not logged in");
 		}
-	}, [handleGetAll, link]);
+	}, [handleGetAll, server_url]);
 
 	const handleSetID = React.useCallback(async (item_id, item_date, item_type, item_name, item_desc) => {
 		try {
@@ -141,7 +149,7 @@ const App = () => {
 
 	const handleEditItem = React.useCallback(async () => {
 		let path = '/update/' + selectedID;
-		let url = link + path;
+		let url = server_url + path;
 
 		const payload = {
 			description: entryValue,
@@ -174,11 +182,11 @@ const App = () => {
 				return null;
 			}
 			handleGetAll(); // retrieve the updated grid after deletion.
-	}, [handleGetAll, link, entryName, selectedID, entryValue, selectedDate, selectedType]);
+	}, [handleGetAll, server_url, entryName, selectedID, entryValue, selectedDate, selectedType]);
 
 	const handleDeleteItem = React.useCallback(async (id) => {
 			let path = '/item/' + id
-			let url = link + path
+			let url = server_url + path
 			console.log(url)
 
 			try{
@@ -193,11 +201,11 @@ const App = () => {
 				return null;
 			}
 			handleGetAll(); // retrieve the updated grid after deletion.
-	}, [handleGetAll, link]);
+	}, [handleGetAll, server_url]);
 
 	const createEntry = async (entryValue, selectedDate, selectedType, selectedName) => {
 		let path = '/create/';
-		let url = link + path;
+		let url = server_url + path;
 
 		const payload = {
 			description: entryValue,
@@ -233,7 +241,7 @@ const App = () => {
 
 	const handleSignUp = async (username, email, password) => {
 		let path = '/auth/signup/';
-		let url = link + path;
+		let url = server_url + path;
 
 		console.log(username, email, password)
 
@@ -275,7 +283,7 @@ const App = () => {
 
 	const handleLogin = async (username, password) => {
 		let path = '/auth/login/';
-		let url = link + path;
+		let url = server_url + path;
 
 		console.log(username, password)
 
@@ -315,9 +323,9 @@ const App = () => {
 		}
 	};
 
-	const handleLogout = async () => {
+	const handleLogout = React.useCallback(async () => {
 		let path = '/auth/logout/';
-		let url = link + path;
+		let url = server_url + path;
 		console.log(url);
 
 		try {
@@ -343,17 +351,20 @@ const App = () => {
 		catch (err) {
 			console.error(err);
 		}
-	};
+	}, [server_url]);
 
-	// functions called right when the app starts.
-	useEffect(() => {checkLogin();},[checkLogin, loggedIn]); // check if user has login credentials already
+	// check if user has login credentials already
+	useEffect(() => {checkLogin();},[checkLogin, server_url]); 
   return (
     <div className="App">
 		
 		<NavigationBar 
 			title={siteTitle}
 			loggedIn={loggedIn}
-			handleLogout={handleLogout} 
+			handleLogout={handleLogout}
+			server_url={server_url}
+			set_server_url={set_server_url}
+			url_list={url_list}
 		/>
 
 		{loggedIn === 0 &&
