@@ -104,7 +104,6 @@ const App = () => {
 
 	// determine if the user has a session
 	const checkLogin = React.useCallback(async () => {
-	// async function checkLogin() {
 		let path = '/auth/user/';
 		let url = server_url + path;
 		
@@ -140,7 +139,7 @@ const App = () => {
 			}
 			else{
 				setSelectedID(item_id);
-			}	
+			}
 		}
 		catch (err) {
 			console.error(err);
@@ -317,6 +316,7 @@ const App = () => {
 			const responseData = await response.json(); // Parses returning JSON string to object
 			console.log('Success:', responseData);
 			setLoggedIn(1);
+			checkLogin();
 		} 
 		catch (err) {
 			console.error(err);
