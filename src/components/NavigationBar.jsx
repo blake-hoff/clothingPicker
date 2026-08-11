@@ -27,18 +27,27 @@ function NavigationBar({
 
 					<FormControl 
 						sx={{ 
-						width: '12vw',
-						'& .MuiInputLabel-root': { color: '#666' },
-						//   '& .MuiInputLabel-root.Mui-focused': { color: yourCustomColor },
+						width: '8vw',
+						'& .MuiInputLabel-root': { color: '#e80606' }
 						}} 
 						variant="outlined"
 						size="small"
 					> 
 						<InputLabel id="select-label">Select URL</InputLabel> 
 							<Box
-								sx={{"& fieldset": { borderColor: "#4f86f8" }, 
-									"&:hover fieldset": { borderColor: "#afc8fb", borderWidth: "3px" }, 
-									"&.Mui-focused fieldset": { borderColor: "#afc8fb" } 
+								sx={{
+									"& .MuiOutlinedInput-root": 
+									{color: "#052668",
+										"& fieldset": {borderColor: "#4f86f8",},
+										"&:hover fieldset": {
+											borderColor: "#afc8fb", 
+											borderWidth: "3px",
+										},
+									},
+
+									"& .MuiInputLabel-root": {
+										color: "#afc8fb",
+									},
 								}}
 							>
 							

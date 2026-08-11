@@ -37,24 +37,40 @@ const App = () => {
 	let url_list = [
 		{"local5000": local_url},
 		{"pyAnywhere": python_anywhere_url}
-		];
+	];
 
 	const [server_url, set_server_url] = useState(python_anywhere_url);
-
+	const [userID, setUserID] = useState(-1);
     const [gridData, setGridData] = useState([]); // array of {id, type_id, name, icon, date, created_at, description}
+	const [filteredData, setFilteredData] = useState([]);
 	
+	const [filteredTypes, setFilteredTypes] = useState(["Outfit", "Meal", "Event"]); // array of [typeName ...]
 	const [typeData, setTypeData] = useState([]); // array of {name, created_at} (use [id-1] to access a particular id; ids start at 1)
+	
+	// ----- ActionBar Fields -----
 	const [selectedType, setSelectedType] = useState('Outfit');
-
 	const [selectedID, setSelectedID] = useState(-1); // stores the ID that will be used for editing
-
 	const [entryValue, setEntryValue] = useState('');
 	const [entryName, setEntryName] = useState('');
 	
 	// selected date (default = today)
 	const [selectedDate, setSelectedDate] = useState(dayjs());
 	const [loggedIn, setLoggedIn] = useState(-1); // set to -1 so neither loginpage or the user page is displayed until the server responds
+	
+	useEffect(() => {
+		const filteredResults = gridData.filter(item => { // looking at all items in the grid, do some tests, 
+			try{
+				const getGridItemType = typeData[item.type_id-1].name; 
 
+				return filteredTypes.includes(getGridItemType);
+			}catch{
+				return false;
+			}
+		});
+
+		setFilteredData(filteredResults);
+		
+	}, [gridData, filteredTypes, typeData]);
 
 	// populating the grid
 	const getGridData = React.useCallback(async () => {
@@ -116,6 +132,7 @@ const App = () => {
 		if(data.logged_in){
 			setLoggedIn(1);
 			handleGetAll();
+			setUserID(data.id);
 			console.log("Logged in");
 		}
 		else{
@@ -391,10 +408,12 @@ const App = () => {
 				setSelectedType={setSelectedType}
 				selectedID={selectedID}
 				setSelectedID={setSelectedID}
+				filteredTypes={filteredTypes}
+				setFilteredTypes={setFilteredTypes}
 			/>
 
 			<ItemGrid
-				gridData={gridData}
+				filteredData={filteredData}
 				formatDate={formatDate}
 				handleDeleteItem={handleDeleteItem}
 				typeData={typeData}

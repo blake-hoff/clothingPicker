@@ -9,10 +9,10 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import Tooltip from '@mui/material/Tooltip';
 
 function ItemGrid({
-    gridData,
+    filteredData,
     formatDate,
     handleDeleteItem,
-    typeData, // using the id from gridData for a specific item, get the name of the type and the created_at
+    typeData, // using the id from filteredData for a specific item, get the name of the type and the created_at
     selectedID,
     handleSetID,
     handleEditItem
@@ -23,7 +23,7 @@ function ItemGrid({
         className="item-grid"
         sx={{px: 4, pr: 4, maxHeight:'calc(80vh - 80px)', overflowY:'scroll', alignContent:'flex-start'}}
         >
-            {gridData.map((item) => (
+            {filteredData.map((item) => (
                 <Grid key={item.id} sx={{minWidth:0, width:"100%"}}>
                     <Card
                         sx={{backgroundColor: item.id === selectedID ? "#5f883b": "#3e4132", color: "white", width: "90%", mx: "auto", overflow: "hidden", height: "auto"}}>
