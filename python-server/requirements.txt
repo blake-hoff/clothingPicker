@@ -20,3 +20,5 @@ email_validator
 dotenv
 
 pytest
+
+Flask-JWT-Extended

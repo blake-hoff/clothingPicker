@@ -12,6 +12,8 @@ from functions import invalidUserParamaters, invalidText
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 from dotenv import load_dotenv
+from datetime import timedelta
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 
 # Load variables from .env file into environment
 load_dotenv(verbose=True)
@@ -20,7 +22,9 @@ logger = logging.getLogger(__name__) # for error logging
 
 app = Flask(__name__)
 app.config.update(SESSION_COOKIE_SAMESITE='None', SESSION_COOKIE_SECURE=True)
-app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY')
+app.config["JWT_SECRET_KEY"] = os.environ.get('FLASK_SECRET_KEY')
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(days=30)
+jwt = JWTManager(app)
 CORS(app, supports_credentials=True, origins=["http://localhost:3000", "https://blake-hoff.github.io"])  # Enables CORS to allow requests from the React frontend
 print(app.url_map)
 
@@ -41,9 +45,11 @@ def base_page():
 
 # Get all entries
 @app.route('/api/view/', methods=['GET'])
+@jwt_required(optional=False)
 def get_all_items():
     # Get all entries in the database
-    userID = session.get("user_id")
+    token_user_id = get_jwt_identity()
+    userID = int(token_user_id)
 
     if userID is None:
         return jsonify({
@@ -68,13 +74,16 @@ def get_all_items():
 
 # Create an entry
 @app.route('/api/create/', methods=['POST'])
+@jwt_required(optional=False)
 def create_entry():
+    token_user_id = get_jwt_identity()
+    userID = int(token_user_id)
+
     # 1. ensure the request is safe to read from,
     # read the request, split up the values into variables here.
     data = request.get_json() # data sent from the user frontend
     print(data)
     
-    userID = session.get("user_id") # user id sent by user
 
     if not data:
         return jsonify({
@@ -150,10 +159,12 @@ def create_entry():
 
 # Update an entry
 @app.route('/api/update/<int:entry_id>', methods=['POST'])
+@jwt_required(optional=False)
 def update_entry(entry_id):
+    token_user_id = get_jwt_identity()
+    userID = int(token_user_id)
+    
     data = request.get_json() # data sent from the user frontend
-
-    userID = session.get("user_id") # user id sent by user
 
     if not data:
         return jsonify({
@@ -229,14 +240,17 @@ def update_entry(entry_id):
         }), 400
 
 @app.route('/api/item/<int:entry_id>', methods=['DELETE'])
+@jwt_required(optional=False)
 def delete_entry(entry_id):
+    token_user_id = get_jwt_identity()
+    userID = int(token_user_id)
+
     # see if it is in the backends database already.
     outfitEntry = Entry.query.filter_by(id=entry_id).first()
 
     # the user id of the database entry must match the session user id.
     outfitUserID = outfitEntry.user_id
 
-    userID = session.get("user_id")
 
     if outfitUserID != userID: # do not allow a malicious user to delete someone elses entry.
         return jsonify({
@@ -270,8 +284,10 @@ def delete_entry(entry_id):
 ## ---------- Type APIs ---------- ##
 # Get all rows of types
 @app.route('/api/types/', methods=['GET'])
+@jwt_required(optional=False)
 def get_all_types():
-    userID = session.get("user_id")
+    token_user_id = get_jwt_identity()
+    userID = int(token_user_id)
 
     if userID is None:
         return jsonify({
@@ -291,12 +307,13 @@ def get_all_types():
 
 # Create an entry in the type table
 @app.route('/api/types/create/', methods=['POST'])
+@jwt_required(optional=False)
 def create_entry_type():
+    token_user_id = get_jwt_identity()
+    userID = int(token_user_id)
+
     data = request.get_json() # data sent from the user frontend
     # print(data)
-    
-    userID = session.get("user_id") # user id sent by user
-
     if not data:
         return jsonify({
             'success': False,
@@ -316,9 +333,6 @@ def create_entry_type():
         }), 200
 
     else: # add to database
-        userID = session.get("user_id")
-        print(userID)
-
         entry = EntryType(name=usersTypeName, max_per_day=3)
         db.session.add(entry)
         db.session.commit()
@@ -330,12 +344,13 @@ def create_entry_type():
 
 # Update an entry in the type table
 @app.route('/api/types/update/', methods=['POST'])
+@jwt_required(optional=False)
 def update_entry_type():
-    data = request.get_json() # data sent from the user frontend
-    # print(data)
-    
-    userID = session.get("user_id") # user id sent by user
+    token_user_id = get_jwt_identity()
+    userID = int(token_user_id)
 
+    data = request.get_json() # data sent from the user frontend
+    
     if not data:
         return jsonify({
             'success': False,
@@ -366,9 +381,12 @@ def update_entry_type():
 
 # Update an entry in the type table
 @app.route('/api/types/delete/', methods=['DELETE'])
+@jwt_required(optional=False)
 def delete_entry_type():
+    token_user_id = get_jwt_identity()
+    userID = int(token_user_id)
+
     data = request.get_json() # data sent from the user frontend
-    userID = session.get("user_id") # user id sent by user
 
     if not data:
         return jsonify({
@@ -476,7 +494,7 @@ def log_in():
     # read the request, split up the values into variables here.
     # if the parameters are invalid, return corresponding error
     # if the username exist, return corresponding error
-    # otherwise, make an account with the received user parameters
+    # otherwise, log in to an account with the received user parameters
 
     data = request.get_json() # data sent from the user frontend
     print(data)
@@ -489,9 +507,7 @@ def log_in():
 
     
     userName = data.get("username")
-    # userEmail = data.get("email") # get user email from payload
-    userPassword = data.get("password") # get user password from payload
-    # print(userName, userPassword)
+    userPassword = data.get("password")
 
     invalidParameters, parametersMessage = invalidUserParamaters(username=userName, password=userPassword)
 
@@ -506,18 +522,14 @@ def log_in():
 
     # if the username exists, need to validate the password.
     if username_db:
-        # used for changing the password.
-        # new_hash = generate_password_hash(userPassword)
-        # username_db.password_hash = new_hash
-        # db.session.commit()
-    
         isValidPassword = check_password_hash(username_db.password_hash, userPassword)
         if isValidPassword:
-            session.permanent = True
-            session["user_id"] = username_db.id
+            access_token = create_access_token(identity=str(username_db.id))
+
             return jsonify({
                 'success': True,
-                'message': f'The account with username \'{userName}\' was found and the password is correct.'
+                'message': f'The account with username \'{userName}\' was found and the password is correct.',
+                'token': access_token
             }), 200
         else:
             return jsonify({
@@ -534,25 +546,31 @@ def log_in():
 
 @app.route("/api/auth/logout/", methods=["POST"])
 def logout():
-    session.clear()
-
     return jsonify({
         "success": True,
         "message": "Logged out."
     }), 200
 
 @app.route("/api/auth/user/")
+@jwt_required(optional=True)
 def user():
-    user_id = session.get("user_id")
+    user_id = get_jwt_identity()
 
     if user_id is None:
         print('not logged in')
         return jsonify({
-            "logged_in": False
-        }), 200
+            "logged_in": False,
+            "error": "No authentication provided."
+            }), 200
 
-    user = User.query.get(user_id)
+    user = User.query.get(int(user_id))
 
+    if not user:
+        return jsonify({
+            "logged_in": False,
+            "error": "No user found."
+            }), 200
+    
     return jsonify({
         "logged_in": True,
         "id": user.id,

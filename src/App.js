@@ -40,7 +40,7 @@ const App = () => {
 	];
 
 	const [server_url, set_server_url] = useState(python_anywhere_url);
-	const [userID, setUserID] = useState(-1);
+	const [userID, setUserID] = useState(null);
     const [gridData, setGridData] = useState([]); // array of {id, type_id, name, icon, date, created_at, description}
 	const [filteredData, setFilteredData] = useState([]);
 	
@@ -76,9 +76,16 @@ const App = () => {
 	const getGridData = React.useCallback(async () => {
 		let path = '/view/';
 		let url = server_url + path;
+		const token = localStorage.getItem("authToken");
 
 		try {
-			const response = await fetch(url, {credentials: 'include'}); // must be authorized user
+			const response = await fetch(url, {
+				method: "GET",
+				headers: {
+					"Authorization": `Bearer ${token}`
+				}}
+			);
+
 			const data = await response.json();
 			console.log(data.items);
 			console.log('get all items')
@@ -94,9 +101,16 @@ const App = () => {
 	const getTypeData = React.useCallback(async () => {
 		let path = '/types/';
 		let url = server_url + path;
+		const token = localStorage.getItem("authToken");
 
 		try {
-			const response = await fetch(url, {credentials: 'include'}); // must be authorized user
+			const response = await fetch(url, {
+				method: "GET",
+				headers: {
+					"Authorization": `Bearer ${token}`
+				}}
+			);
+
 			const data = await response.json();
 			console.log(data.items);
 			console.log('get all types')
@@ -122,12 +136,16 @@ const App = () => {
 	const checkLogin = React.useCallback(async () => {
 		let path = '/auth/user/';
 		let url = server_url + path;
-		
-		const response = await fetch(url, {credentials: "include"});
+		const token = localStorage.getItem("authToken");
+
+		const response = await fetch(url, {
+			method: "GET",
+			headers: {
+				"Authorization": `Bearer ${token}`
+			}}
+		);
 
 		const data = await response.json();
-
-		console.log(data);
 
 		if(data.logged_in){
 			setLoggedIn(1);
@@ -137,6 +155,8 @@ const App = () => {
 		}
 		else{
 			setLoggedIn(0);
+			localStorage.removeItem("authToken");
+			setUserID(null);
 			console.log("Not logged in");
 		}
 	}, [handleGetAll, server_url]);
@@ -166,6 +186,7 @@ const App = () => {
 	const handleEditItem = React.useCallback(async () => {
 		let path = '/update/' + selectedID;
 		let url = server_url + path;
+		const token = localStorage.getItem("authToken");
 
 		const payload = {
 			description: entryValue,
@@ -177,8 +198,8 @@ const App = () => {
 				// send the value in the text field to the server
 				const response = await fetch(url, {
 					method: 'POST',
-					credentials: "include",
 					headers: {
+						"Authorization": `Bearer ${token}`,
 						'Content-Type': 'application/json', // Tells server to expect JSON
 						'Accept': 'application/json'        // Tells server client expects JSON back
 					},
@@ -204,9 +225,15 @@ const App = () => {
 			let path = '/item/' + id
 			let url = server_url + path
 			console.log(url)
+			const token = localStorage.getItem("authToken");
 
 			try{
-				const response = await fetch(url, {method: "DELETE", credentials: 'include'});
+				const response = await fetch(url, {
+					method: "DELETE", 
+					headers: {
+						"Authorization": `Bearer ${token}`
+					}}
+				);
 				const data = await response.json();
 
 				console.log(data)
@@ -222,6 +249,7 @@ const App = () => {
 	const createEntry = async (entryValue, selectedDate, selectedType, selectedName) => {
 		let path = '/create/';
 		let url = server_url + path;
+		const token = localStorage.getItem("authToken");
 
 		const payload = {
 			description: entryValue,
@@ -233,8 +261,8 @@ const App = () => {
 			// send the value in the text field to the server
 			const response = await fetch(url, {
 				method: 'POST',
-				credentials: "include",
 				headers: {
+					"Authorization": `Bearer ${token}`,
 					'Content-Type': 'application/json', // Tells server to expect JSON
 					'Accept': 'application/json'        // Tells server client expects JSON back
 				},
@@ -269,7 +297,6 @@ const App = () => {
 		try {
 			const response = await fetch(url, {
 				method: 'POST',
-				credentials: 'include',
 				headers: {
 					'Content-Type': 'application/json', // Tells server to expect JSON
 					'Accept': 'application/json'        // Tells server client expects JSON back
@@ -310,7 +337,6 @@ const App = () => {
 		try {
 			const response = await fetch(url, {
 				method: 'POST',
-				credentials: "include",
 				headers: {
 					'Content-Type': 'application/json', // Tells server to expect JSON
 					'Accept': 'application/json'        // Tells server client expects JSON back
@@ -330,9 +356,9 @@ const App = () => {
 				throw new Error(`HTTP error! Status: ${response.status} Message: ${responseData.message}`);
 			}
 
-			const responseData = await response.json(); // Parses returning JSON string to object
+			const responseData = await response.json();
 			console.log('Success:', responseData);
-			setLoggedIn(1);
+			localStorage.setItem("authToken", responseData.token);
 			checkLogin();
 		} 
 		catch (err) {
@@ -344,16 +370,17 @@ const App = () => {
 		let path = '/auth/logout/';
 		let url = server_url + path;
 		console.log(url);
+		const token = localStorage.getItem("authToken");
 
 		try {
 			const response = await fetch(url, {
 				method: 'POST',
-				credentials: "include",
 				headers: {
+					"Authorization": `Bearer ${token}`,
 					'Content-Type': 'application/json', // Tells server to expect JSON
 					'Accept': 'application/json'        // Tells server client expects JSON back
-				},
-			});
+				}}
+			);
 
 			if (!response.ok) {
 				const responseData = await response.json();
@@ -364,6 +391,8 @@ const App = () => {
 			const responseData = await response.json(); // Parses returning JSON string to object
 			console.log('Success:', responseData);
 			setLoggedIn(0);
+			localStorage.removeItem("authToken");
+			setUserID(null);
 		} 
 		catch (err) {
 			console.error(err);
