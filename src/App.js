@@ -11,6 +11,7 @@ import NavigationBar from './components/NavigationBar';
 import ActionBar from './components/ActionBar';
 import ItemGrid from './components/ItemGrid';
 import LoginPage from './components/LoginPage';
+import { MessageProvider, useMessage } from './components/MessageContext';
 import MessageScreen from './components/MessageScreen';
 
 
@@ -27,7 +28,7 @@ const formatDate = (dateStr) => {
   });
 };
 
-const App = () => {
+const AppContent = () => {
 	// site title passed into various components.
 	const siteTitle = "CloTrack"
 
@@ -57,6 +58,8 @@ const App = () => {
 	const [selectedDate, setSelectedDate] = useState(dayjs());
 	const [loggedIn, setLoggedIn] = useState(-1); // set to -1 so neither loginpage or the user page is displayed until the server responds
 	
+	const { showMessage } = useMessage();
+
 	useEffect(() => {
 		const filteredResults = gridData.filter(item => { // looking at all items in the grid, do some tests, 
 			try{
@@ -83,7 +86,8 @@ const App = () => {
 				method: "GET",
 				headers: {
 					"Authorization": `Bearer ${token}`
-				}}
+				}
+			}
 			);
 
 			const data = await response.json();
@@ -307,17 +311,23 @@ const App = () => {
 			if (!response.ok) {
 				const responseData = await response.json();
 				
-				MessageScreen({
-					title: response.status,
-					message: responseData.message,
-					type: 'error'
-				});
+				showMessage(
+					`Invalid (${response.status})`,
+					responseData.message,
+					'error'
+				);
 
 				throw new Error(`HTTP error! Status: ${response.status} Message: ${responseData.message}`);
 			}
 
 			const responseData = await response.json(); // Parses returning JSON string to object
 			console.log('Success:', responseData);
+			showMessage(
+				`Successfully created new account! (${response.status})`,
+				responseData.message,
+				'success'
+			);
+			// handleLogin(username, password);
 		} 
 		catch (err) {
 			console.error(err);
@@ -347,11 +357,11 @@ const App = () => {
 			if (!response.ok) {
 				const responseData = await response.json();
 				
-				MessageScreen({
-					title: response.status,
-					message: responseData.message,
-					type: 'error'
-				});
+				showMessage(
+					`Invalid (${response.status})`,
+					responseData.message,
+					'error'
+				);
 
 				throw new Error(`HTTP error! Status: ${response.status} Message: ${responseData.message}`);
 			}
@@ -360,6 +370,11 @@ const App = () => {
 			console.log('Success:', responseData);
 			localStorage.setItem("authToken", responseData.token);
 			checkLogin();
+			showMessage(
+					`Logged in successfully! (${response.status})`,
+					responseData.message,
+					'success'
+				);
 		} 
 		catch (err) {
 			console.error(err);
@@ -402,59 +417,68 @@ const App = () => {
 	// check if user has login credentials already
 	useEffect(() => {checkLogin();},[checkLogin, server_url]); 
   return (
-    <div className="App">
-		
-		<NavigationBar 
-			title={siteTitle}
-			loggedIn={loggedIn}
-			handleLogout={handleLogout}
-			server_url={server_url}
-			set_server_url={set_server_url}
-			url_list={url_list}
-		/>
+		<div className="App">
+			<MessageScreen />
+			
+			<NavigationBar 
+				title={siteTitle}
+				loggedIn={loggedIn}
+				handleLogout={handleLogout}
+				server_url={server_url}
+				set_server_url={set_server_url}
+				url_list={url_list}
+				/>
 
-		{loggedIn === 0 &&
-			<LoginPage 
+			{loggedIn === 0 &&
+				<LoginPage 
 				title={siteTitle} 
 				handleSignUp={handleSignUp} 
 				handleLogin={handleLogin}
-			/>
-		}
+				/>
+			}
 
-		{loggedIn === 1 && <div>
-			<ActionBar 
-				handleGetAll={handleGetAll}
-				selectedDate={selectedDate}
-				setSelectedDate={setSelectedDate}
-				createEntry={createEntry}
-				gridData={gridData}
-				entryValue={entryValue}
-				setEntryValue={setEntryValue}
-				entryName={entryName}
-				setEntryName={setEntryName}
-				typeData={typeData}
-				selectedType={selectedType}
-				setSelectedType={setSelectedType}
-				selectedID={selectedID}
-				setSelectedID={setSelectedID}
-				filteredTypes={filteredTypes}
-				setFilteredTypes={setFilteredTypes}
-			/>
+			{loggedIn === 1 && <div>
+				<ActionBar 
+					handleGetAll={handleGetAll}
+					selectedDate={selectedDate}
+					setSelectedDate={setSelectedDate}
+					createEntry={createEntry}
+					gridData={gridData}
+					entryValue={entryValue}
+					setEntryValue={setEntryValue}
+					entryName={entryName}
+					setEntryName={setEntryName}
+					typeData={typeData}
+					selectedType={selectedType}
+					setSelectedType={setSelectedType}
+					selectedID={selectedID}
+					setSelectedID={setSelectedID}
+					filteredTypes={filteredTypes}
+					setFilteredTypes={setFilteredTypes}
+					/>
 
-			<ItemGrid
-				filteredData={filteredData}
-				formatDate={formatDate}
-				handleDeleteItem={handleDeleteItem}
-				typeData={typeData}
-				selectedID={selectedID}
-				handleSetID={handleSetID}
-				handleEditItem={handleEditItem}
-			/>
+				<ItemGrid
+					filteredData={filteredData}
+					formatDate={formatDate}
+					handleDeleteItem={handleDeleteItem}
+					typeData={typeData}
+					selectedID={selectedID}
+					handleSetID={handleSetID}
+					handleEditItem={handleEditItem}
+					/>
+			</div>
+			}
+			
 		</div>
-		}
-		
-    </div>
   );
+};
+
+const App = () => {
+	return (
+		<MessageProvider>
+			<AppContent/>
+		</MessageProvider>
+	);
 }
 
 export default App;

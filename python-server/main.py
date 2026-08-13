@@ -551,6 +551,23 @@ def logout():
         "message": "Logged out."
     }), 200
 
+# for any request with invalid tokens in the headers, send 401.
+@jwt.invalid_token_loader
+def my_invalid_token_callback(error_string):
+    return jsonify({
+        "logged_in": False,
+        "error": "Invalid token provided.",
+        "details": error_string
+    }), 401
+
+# for any request with no token in the header, send 200.
+@jwt.unauthorized_loader
+def my_unauthorized_callback(error_string):
+    return jsonify({
+        "logged_in": False,
+        "error": "Missing authorization header."
+    }), 200
+
 @app.route("/api/auth/user/")
 @jwt_required(optional=True)
 def user():
