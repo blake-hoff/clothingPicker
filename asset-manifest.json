@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/clothingPicker/static/css/main.1fd70619.css",
-    "main.js": "/clothingPicker/static/js/main.b2b4e334.js",
-    "static/js/453.63309ceb.chunk.js": "/clothingPicker/static/js/453.63309ceb.chunk.js",
-    "index.html": "/clothingPicker/index.html",
-    "main.1fd70619.css.map": "/clothingPicker/static/css/main.1fd70619.css.map",
-    "main.b2b4e334.js.map": "/clothingPicker/static/js/main.b2b4e334.js.map",
-    "453.63309ceb.chunk.js.map": "/clothingPicker/static/js/453.63309ceb.chunk.js.map"
+    "main.css": "/Journal-Web-App/static/css/main.1fd70619.css",
+    "main.js": "/Journal-Web-App/static/js/main.6c0368ce.js",
+    "static/js/453.63309ceb.chunk.js": "/Journal-Web-App/static/js/453.63309ceb.chunk.js",
+    "index.html": "/Journal-Web-App/index.html",
+    "main.1fd70619.css.map": "/Journal-Web-App/static/css/main.1fd70619.css.map",
+    "main.6c0368ce.js.map": "/Journal-Web-App/static/js/main.6c0368ce.js.map",
+    "453.63309ceb.chunk.js.map": "/Journal-Web-App/static/js/453.63309ceb.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.1fd70619.css",
-    "static/js/main.b2b4e334.js"
+    "static/js/main.6c0368ce.js"
   ]
 }
