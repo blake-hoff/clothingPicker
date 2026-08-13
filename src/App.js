@@ -30,7 +30,7 @@ const formatDate = (dateStr) => {
 
 const AppContent = () => {
 	// site title passed into various components.
-	const siteTitle = "CloTrack"
+	const siteTitle = "Daily Journal App"
 
 	// urls passed into various states and functions.
 	let local_url = 'http://localhost:5000/api';
@@ -42,6 +42,7 @@ const AppContent = () => {
 
 	const [server_url, set_server_url] = useState(python_anywhere_url);
 	const [userID, setUserID] = useState(null);
+	const [usersName, setUsersName] = useState(null);
     const [gridData, setGridData] = useState([]); // array of {id, type_id, name, icon, date, created_at, description}
 	const [filteredData, setFilteredData] = useState([]);
 	
@@ -60,6 +61,7 @@ const AppContent = () => {
 	
 	const { showMessage } = useMessage();
 
+	// filtering the grid
 	useEffect(() => {
 		const filteredResults = gridData.filter(item => { // looking at all items in the grid, do some tests, 
 			try{
@@ -155,6 +157,7 @@ const AppContent = () => {
 			setLoggedIn(1);
 			handleGetAll();
 			setUserID(data.id);
+			setUsersName(data.username)
 			console.log("Logged in");
 		}
 		else{
@@ -247,6 +250,7 @@ const AppContent = () => {
 				alert(err);
 				return null;
 			}
+			// clearActionBar();
 			handleGetAll(); // retrieve the updated grid after deletion.
 	}, [handleGetAll, server_url]);
 
@@ -322,12 +326,20 @@ const AppContent = () => {
 
 			const responseData = await response.json(); // Parses returning JSON string to object
 			console.log('Success:', responseData);
-			showMessage(
-				`Successfully created new account! (${response.status})`,
-				responseData.message,
-				'success'
-			);
-			// handleLogin(username, password);
+			if(response.status === 200){
+				showMessage(
+					`Successfully created account "${username}"! (${response.status})`,
+					responseData.message,
+					'success'
+				);
+			}
+			else{
+				showMessage(
+					`Could not create account. (${response.status})`,
+					responseData.message,
+					'error'
+				);
+			}
 		} 
 		catch (err) {
 			console.error(err);
@@ -408,7 +420,8 @@ const AppContent = () => {
 			setLoggedIn(0);
 			localStorage.removeItem("authToken");
 			setUserID(null);
-		} 
+			setUsersName(null);
+		}
 		catch (err) {
 			console.error(err);
 		}
@@ -427,6 +440,7 @@ const AppContent = () => {
 				server_url={server_url}
 				set_server_url={set_server_url}
 				url_list={url_list}
+				usersName={usersName}
 				/>
 
 			{loggedIn === 0 &&

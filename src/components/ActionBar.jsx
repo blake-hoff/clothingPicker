@@ -36,29 +36,29 @@ function ActionBar({
 	filteredTypes,
 	setFilteredTypes
 	}) {
-		useEffect(() => {
-			const existingEntry = gridData.find(item => { // looking at all items in the grid, do some tests, 
-			// if its true then set existing entry to this item, false (catch) then skip to the next element in the grid.
-				try{
-					const getGridItemDate = new Date(item.date).toISOString().split("T")[0]; // the server date has been formatted to a string.
-					const getGridItemType = typeData[item.type_id-1].name; // a particular item in the grids type.
+		// useEffect(() => {
+		// 	const existingEntry = gridData.find(item => { // looking at all items in the grid, do some tests, 
+		// 	// if its true then set existing entry to this item, false (catch) then skip to the next element in the grid.
+		// 		try{
+		// 			const getGridItemDate = new Date(item.date).toISOString().split("T")[0]; // the server date has been formatted to a string.
+		// 			const getGridItemType = typeData[item.type_id-1].name; // a particular item in the grids type.
 
-					return getGridItemDate === selectedDate.format("YYYY-MM-DD") && getGridItemType === selectedType;
+		// 			return getGridItemDate === selectedDate.format("YYYY-MM-DD") && getGridItemType === selectedType;
 					
-					// selectedDate is in datejs format, needs to be string to compare to the grid (server) date
-					// also need to make sure that the clients selected type matches this particular items type.
-					// if both (and &&) match (===), it will return true.
-				}catch{
-					return false;
-				}
-			});
+		// 			// selectedDate is in datejs format, needs to be string to compare to the grid (server) date
+		// 			// also need to make sure that the clients selected type matches this particular items type.
+		// 			// if both (and &&) match (===), it will return true.
+		// 		}catch{
+		// 			return false;
+		// 		}
+		// 	});
 
-			if(selectedID === -1){
-				setEntryValue(existingEntry ? existingEntry.description : '');
-				setEntryName(existingEntry ? existingEntry.name : '');
-			}
+		// 	if(selectedID === -1){
+		// 		setEntryValue(existingEntry ? existingEntry.description : '');
+		// 		setEntryName(existingEntry ? existingEntry.name : '');
+		// 	}
 			
-		}, [selectedDate, selectedType, gridData]);
+		// }, [selectedDate, selectedType, gridData]);
 
 		const ITEM_HEIGHT = 48;
 		const ITEM_PADDING_TOP = 8;

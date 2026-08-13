@@ -15,7 +15,6 @@ function LoginPage({title, handleSignUp, handleLogin}) {
     const handleChangeLogin = () => {
         setLogin(login ? false : true);
         
-
         // clear all fields.
         // setUsername('');
         // setEmail('');

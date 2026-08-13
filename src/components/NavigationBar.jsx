@@ -11,7 +11,8 @@ function NavigationBar({
 	handleLogout,
 	server_url,
 	set_server_url,
-	url_list
+	url_list,
+	usersName
 	}) {
     return (
         <AppBar position="static" sx={{bgcolor: '#00ff66'}}>
@@ -22,12 +23,11 @@ function NavigationBar({
 						style={{ height: 35 }}
 					/>
 					<Typography variant="h6" fontWeight="bold" sx={{color: '#4f86f8'}}>
-						{title}
+						{ usersName ? `${title} - ${usersName}` : title}
 					</Typography>
 
 					<FormControl 
-						sx={{ 
-						width: '8vw',
+						sx={{
 						'& .MuiInputLabel-root': { color: '#e80606' }
 						}} 
 						variant="outlined"
