@@ -77,6 +77,13 @@ const AppContent = () => {
 		
 	}, [gridData, filteredTypes, typeData]);
 
+	const clearActionBar = () => {
+		// fields to reset are: ID, entryValue, entryName
+		setSelectedID(-1);
+		setEntryValue('');
+		setEntryName('');
+	};
+
 	// populating the grid
 	const getGridData = React.useCallback(async () => {
 		let path = '/view/';
@@ -170,19 +177,20 @@ const AppContent = () => {
 
 	const handleSetID = React.useCallback(async (item_id, item_date, item_type, item_name, item_desc) => {
 		try {
-			const stringDate = new Date(item_date).toISOString().split("T")[0];
-			setSelectedDate(dayjs(stringDate)); // the calendar component needs the date to be in datejs format
-			setSelectedType(item_type);
-			setEntryName(item_name); // can use the grid data since i have the id already.
-			setEntryValue(item_desc);
 			console.log(selectedID, item_id);
+
 			if(selectedID === item_id){
 				setSelectedID(-1);
-				setSelectedDate(dayjs());
-				// resetting the date auto resets the other fields in action bar.
+				// setSelectedDate(dayjs());
+				clearActionBar();
 			}
 			else{
 				setSelectedID(item_id);
+				const stringDate = new Date(item_date).toISOString().split("T")[0];
+				setSelectedDate(dayjs(stringDate)); // the calendar component needs the date to be in datejs format
+				setSelectedType(item_type);
+				setEntryName(item_name); // can use the grid data since i have the id already.
+				setEntryValue(item_desc);
 			}
 		}
 		catch (err) {
@@ -225,7 +233,8 @@ const AppContent = () => {
 				alert(err);
 				return null;
 			}
-			handleGetAll(); // retrieve the updated grid after deletion.
+			handleGetAll(); // retrieve the updated grid after successful edit.
+			clearActionBar();
 	}, [handleGetAll, server_url, entryName, selectedID, entryValue, selectedDate, selectedType]);
 
 	const handleDeleteItem = React.useCallback(async (id) => {
@@ -250,7 +259,7 @@ const AppContent = () => {
 				alert(err);
 				return null;
 			}
-			// clearActionBar();
+			clearActionBar();
 			handleGetAll(); // retrieve the updated grid after deletion.
 	}, [handleGetAll, server_url]);
 
@@ -279,12 +288,14 @@ const AppContent = () => {
 
 			if (!response.ok) {
 				throw new Error(`HTTP error! Status: ${response.status}`);
+				// showMessage()
 			}
 
 			const responseData = await response.json(); // Parses returning JSON string to object
 			console.log('Success:', responseData);
 
 			handleGetAll();
+			clearActionBar();
 		} 
 		catch (err) {
 			console.error(err);
