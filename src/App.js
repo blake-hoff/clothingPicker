@@ -452,13 +452,13 @@ const AppContent = () => {
 				set_server_url={set_server_url}
 				url_list={url_list}
 				usersName={usersName}
-				/>
+			/>
 
 			{loggedIn === 0 &&
 				<LoginPage 
-				title={siteTitle} 
-				handleSignUp={handleSignUp} 
-				handleLogin={handleLogin}
+					title={siteTitle} 
+					handleSignUp={handleSignUp} 
+					handleLogin={handleLogin}
 				/>
 			}
 
@@ -476,11 +476,9 @@ const AppContent = () => {
 					typeData={typeData}
 					selectedType={selectedType}
 					setSelectedType={setSelectedType}
-					selectedID={selectedID}
-					setSelectedID={setSelectedID}
 					filteredTypes={filteredTypes}
 					setFilteredTypes={setFilteredTypes}
-					/>
+				/>
 
 				<ItemGrid
 					filteredData={filteredData}
@@ -490,7 +488,7 @@ const AppContent = () => {
 					selectedID={selectedID}
 					handleSetID={handleSetID}
 					handleEditItem={handleEditItem}
-					/>
+				/>
 			</div>
 			}
 			

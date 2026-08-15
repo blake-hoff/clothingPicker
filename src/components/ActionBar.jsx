@@ -1,6 +1,5 @@
 import * as React from 'react';
 
-import { useEffect } from 'react';
 import {Box, IconButton, TextField, InputLabel, FormControl, Select, MenuItem} from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import AddBoxIcon from '@mui/icons-material/AddBox';
@@ -32,34 +31,9 @@ function ActionBar({
 	typeData,
 	selectedType,
 	setSelectedType,
-	selectedID,
 	filteredTypes,
 	setFilteredTypes
 	}) {
-		// useEffect(() => {
-		// 	const existingEntry = gridData.find(item => { // looking at all items in the grid, do some tests, 
-		// 	// if its true then set existing entry to this item, false (catch) then skip to the next element in the grid.
-		// 		try{
-		// 			const getGridItemDate = new Date(item.date).toISOString().split("T")[0]; // the server date has been formatted to a string.
-		// 			const getGridItemType = typeData[item.type_id-1].name; // a particular item in the grids type.
-
-		// 			return getGridItemDate === selectedDate.format("YYYY-MM-DD") && getGridItemType === selectedType;
-					
-		// 			// selectedDate is in datejs format, needs to be string to compare to the grid (server) date
-		// 			// also need to make sure that the clients selected type matches this particular items type.
-		// 			// if both (and &&) match (===), it will return true.
-		// 		}catch{
-		// 			return false;
-		// 		}
-		// 	});
-
-		// 	if(selectedID === -1){
-		// 		setEntryValue(existingEntry ? existingEntry.description : '');
-		// 		setEntryName(existingEntry ? existingEntry.name : '');
-		// 	}
-			
-		// }, [selectedDate, selectedType, gridData]);
-
 		const ITEM_HEIGHT = 48;
 		const ITEM_PADDING_TOP = 8;
 		const MenuProps = {
@@ -82,32 +56,30 @@ function ActionBar({
 
     return (
 
-		<Box sx={{position: "static", width: "100%", display: "flex", alignItems: "center", gap: 2, padding: 2, borderBottom: "5px solid rgba(255,255,255,0.2)"}}>
+		<Box sx={{position: "static", width: "100%", display: "flex", flexWrap: "wrap", alignItems: "center", gap: 2, padding: 2, borderBottom: "5px solid rgba(255,255,255,0.2)"}}>
 			{/* refresh button */}
-			<Tooltip title="Reload" arrow>
-				<IconButton onClick={handleGetAll} sx={{backgroundColor: "secondary.main", color: "white", "&:hover": { backgroundColor: "secondary.dark" }}}>
-					<RefreshIcon />
-				</IconButton>
-			</Tooltip>
+			<Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+				<Tooltip title="Reload" arrow>
+					<IconButton onClick={handleGetAll} sx={{backgroundColor: "secondary.main", color: "white", "&:hover": { backgroundColor: "secondary.dark" }}}>
+						<RefreshIcon />
+					</IconButton>
+				</Tooltip>
+			</Box>
 			
 			{/* calendar date selection */}
-			<LocalizationProvider dateAdapter={AdapterDayjs}>
-				<Box sx={{ display: 'flex', justifyContent: 'center', 
-					"& .MuiOutlinedInput-root": 
-					{color: "#afc8fb","& fieldset": {borderColor: "#4f86f8",},
-
-					"&:hover fieldset": {
-					borderColor: "#afc8fb", 
-					borderWidth: "3px",
-					},
-					},
-
-				"& .MuiInputLabel-root": {
-					color: "#afc8fb",
+			<Box sx={{ display: 'flex', justifyContent: 'center', 
+				gap: 2,
+				flexGrow: 0,
+				"& .MuiOutlinedInput-root": 
+				{color: "#afc8fb",
+					"& fieldset": {borderColor: "#4f86f8",},
+					"&:hover fieldset": {borderColor: "#afc8fb", borderWidth: "3px",},
 				},
-				}}>
+				"& .MuiInputLabel-root": {color: "#afc8fb",},
+			}}>
+					<LocalizationProvider dateAdapter={AdapterDayjs}>
 					<DatePicker
-						label="Select Outfit Date"
+						label="Outfit Date*"
 						value={selectedDate}
 						onChange={(newDate) => setSelectedDate(dayjs(newDate))}
 						slotProps={{ 
@@ -117,7 +89,6 @@ function ActionBar({
 							} 
 						}} 
 					/>
-				</Box>
 
 				<Tooltip title="Jump to Today" arrow>
 					<IconButton onClick={() => setSelectedDate(dayjs(new Date()))} variant="contained" color="primary" sx={{ padding: '1px' }}>
@@ -137,11 +108,12 @@ function ActionBar({
 					</IconButton>
 				</Tooltip>
 
-			</LocalizationProvider>
+				</LocalizationProvider>
+			</Box>
 
 			<Box 
 				sx={{ 
-					width: '6vw',
+					minWidth: "100px",
 					display: 'flex', 
 					justifyContent: 'center', 
 					"& .MuiOutlinedInput-root": {
@@ -155,13 +127,13 @@ function ActionBar({
 				}}
 			> 
 				<FormControl fullWidth variant="outlined"> 
-					<InputLabel id="select-label">Select Type</InputLabel> 
+					<InputLabel id="select-label">Type*</InputLabel> 
 					
 					<Select 
 						labelId="select-label"
 						value={selectedType}
 						onChange={(event) => setSelectedType(event.target.value)}
-						label="Select Type"
+						label="Type*"
 					> 
 						{typeData.map((item) => ( 
 						<MenuItem key={item.name} value={item.name}> 
@@ -180,7 +152,7 @@ function ActionBar({
       			minRows={1}
       			maxRows={3}
 				id="outlined-controlled" 
-				label={"Enter " + selectedType + " Here"}
+				label={`${selectedType} Description*`}
 				value={entryValue} 
 				onChange={(event) => {setEntryValue(event.target.value);}}
 
@@ -206,7 +178,7 @@ function ActionBar({
 
 			<TextField 
 				id="outlined-controlled" 
-				label={"Enter Name Here"}
+				label={`${selectedType} Name`}
 				value={entryName} 
 				onChange={(event) => {setEntryName(event.target.value);}}
 
