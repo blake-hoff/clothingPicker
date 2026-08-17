@@ -38,9 +38,9 @@ function ItemGrid({
                                     sx={{bgcolor:"#ffffff"}}
                                     >
                                     {item.id === selectedID ? 
-                                    <CheckCircleIcon/> 
+                                    <CheckCircleIcon /> 
                                     : 
-                                    <RadioButtonUncheckedIcon/> }
+                                    <RadioButtonUncheckedIcon /> }
                                 </IconButton>
                                 
                             </Grid>
@@ -72,19 +72,19 @@ function ItemGrid({
                             </Grid>
                             
                             <Grid sx={{mr:1, ml:'auto', width: "8%", justifyContent: "flex-end"}}>
-                                <Box sx={{ display: "flex", gap: 1, mt: 1, justifyContent: "center", backgroundColor:'#000000', borderRadius: '10px'}}>
+                                <Box sx={{ display: "flex", flexWrap:"wrap", minWidth: "25px", gap: 1, mt: 1, justifyContent: "center", backgroundColor:'#000000', borderRadius: '10px'}}>
                                     {item.id === selectedID && <IconButton 
                                         onClick={() => handleEditItem()}
                                         variant="contained" color="info" size="small" 
                                         >
                                         <Tooltip title="Edit Item" arrow>
-                                            <EditIcon/>
+                                            <EditIcon sx={{"&:hover": { color: "#afc8fb" }}}/>
                                         </Tooltip>
                                     </IconButton>}
 
                                     {item.id === selectedID && <IconButton variant="contained" color="error" size="small" onClick={() => handleDeleteItem(item.id)}>
                                         <Tooltip title="Delete Item" arrow>
-                                            <DeleteIcon />
+                                            <DeleteIcon sx={{"&:hover": { color: "#afc8fb" }}}/>
                                         </Tooltip>
                                     </IconButton>}
                                 </Box>

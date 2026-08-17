@@ -60,7 +60,18 @@ function ActionBar({
 			{/* refresh button */}
 			<Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
 				<Tooltip title="Reload" arrow>
-					<IconButton onClick={handleGetAll} sx={{backgroundColor: "secondary.main", color: "white", "&:hover": { backgroundColor: "secondary.dark" }}}>
+					<IconButton
+						onClick={handleGetAll} 
+						sx={{ ml: 'auto', transition: "all 0.3s ease",
+							color: "#fefefe",
+							backgroundColor: "secondary.main",
+								"&:hover": {
+									backgroundColor: "#4f86f8",
+									color: "#00ff66",
+									boxShadow: "0px 0px 5px 3px #00ff66",
+								}
+							}}
+					>
 						<RefreshIcon />
 					</IconButton>
 				</Tooltip>
@@ -77,38 +88,55 @@ function ActionBar({
 				},
 				"& .MuiInputLabel-root": {color: "#afc8fb",},
 			}}>
-					<LocalizationProvider dateAdapter={AdapterDayjs}>
+				<LocalizationProvider dateAdapter={AdapterDayjs}>
 					<DatePicker
-						label="Outfit Date*"
+						label={`${selectedType} Date`}
 						value={selectedDate}
 						onChange={(newDate) => setSelectedDate(dayjs(newDate))}
 						slotProps={{ 
 							textField: { 
 							size: 'small',
 							fullWidth: true // match input width to container
-							} 
+							},
+							openPickerButton: { // small calendar icon needs coloring.
+								sx: {
+									color: "#4f86f8", 
+									"&:hover": { color: "#afc8fb" }
+								}
+							}
 						}} 
+						sx={{
+							"& .MuiOutlinedInput-root": {
+								color: "#afc8fb",
+								"& fieldset": { borderColor: "#4f86f8" },
+								"&:hover fieldset": { borderColor: "#afc8fb", borderWidth: "3px" },
+								"&.Mui-focused fieldset": { borderColor: "#4f86f8", borderWidth: "2px" },
+							},
+							"& .MuiInputLabel-root": { color: "#afc8fb" },
+							"& .MuiInputLabel-root.Mui-focused": { color: "#ffffff" },
+						}}
 					/>
+				</LocalizationProvider>
 
 				<Tooltip title="Jump to Today" arrow>
 					<IconButton onClick={() => setSelectedDate(dayjs(new Date()))} variant="contained" color="primary" sx={{ padding: '1px' }}>
-						<EventRepeatIcon sx={{ fontSize: 32 }}/>
+						<EventRepeatIcon sx={{ fontSize: 32, 
+							"&:hover": { color: "#afc8fb" } }}/>
 					</IconButton>
 				</Tooltip>
 
 				<Tooltip title="Back One Day" arrow>
 					<IconButton onClick={() => setSelectedDate(selectedDate.subtract(1, 'day'))} variant="contained" color="primary" sx={{ padding: '1px' }}>
-						<KeyboardArrowLeftIcon sx={{ fontSize: 32 }}/>
+						<KeyboardArrowLeftIcon sx={{ fontSize: 32, "&:hover": { color: "#afc8fb" } }}/>
 					</IconButton>
 				</Tooltip>
 
 				<Tooltip title="Forward One Day" arrow>
 					<IconButton onClick={() => setSelectedDate(selectedDate.add(1, 'day'))} variant="contained" color="primary" sx={{ padding: '1px' }}>
-						<KeyboardArrowRightIcon sx={{ fontSize: 32 }}/>
+						<KeyboardArrowRightIcon sx={{ fontSize: 32, "&:hover": { color: "#afc8fb" }}}/>
 					</IconButton>
 				</Tooltip>
 
-				</LocalizationProvider>
 			</Box>
 
 			<Box 
@@ -117,23 +145,23 @@ function ActionBar({
 					display: 'flex', 
 					justifyContent: 'center', 
 					"& .MuiOutlinedInput-root": {
-					color: "#afc8fb",
-					"& fieldset": { borderColor: "#4f86f8" }, 
-					"&:hover fieldset": { borderColor: "#afc8fb", borderWidth: "3px" }, 
-					"&.Mui-focused fieldset": { borderColor: "#afc8fb" } 
-					}, 
+						color: "#afc8fb",
+						"& fieldset": { borderColor: "#4f86f8" },
+						"&:hover fieldset": { borderColor: "#afc8fb", borderWidth: "3px" },
+						"&.Mui-focused fieldset": { borderColor: "#4f86f8", borderWidth: "2px" },
+					},
 					"& .MuiInputLabel-root": { color: "#afc8fb" },
-					"& .MuiInputLabel-root.Mui-focused": { color: "#afc8fb" }
+					"& .MuiInputLabel-root.Mui-focused": { color: "#ffffff" },
 				}}
 			> 
 				<FormControl fullWidth variant="outlined"> 
-					<InputLabel id="select-label">Type*</InputLabel> 
+					<InputLabel id="select-label">Type</InputLabel> 
 					
 					<Select 
 						labelId="select-label"
 						value={selectedType}
 						onChange={(event) => setSelectedType(event.target.value)}
-						label="Type*"
+						label="Type"
 					> 
 						{typeData.map((item) => ( 
 						<MenuItem key={item.name} value={item.name}> 
@@ -144,99 +172,73 @@ function ActionBar({
 				</FormControl> 
 			</Box>
 
-	  
-			
 			{/* user input */}
 			<TextField 
 				multiline
-      			minRows={1}
-      			maxRows={3}
-				id="outlined-controlled" 
+				minRows={1}
+				maxRows={3}
+				id="outlined-controlled-desc" 
 				label={`${selectedType} Description*`}
 				value={entryValue} 
-				onChange={(event) => {setEntryValue(event.target.value);}}
-
-				sx={{"& .MuiOutlinedInput-root": 
-						{color: "#afc8fb","& fieldset": {borderColor: "#4f86f8",},
-
-						"&:hover fieldset": {
-						borderColor: "#afc8fb", 
-						borderWidth: "3px",
-						},
-
-						"&.Mui-focused fieldset": {
-						borderColor: "#4f86f8",
-						borderWidth: "4px",
-						},
-					},
-
-					"& .MuiInputLabel-root": {
+				onChange={(event) => setEntryValue(event.target.value)}
+				sx={{
+					"& .MuiOutlinedInput-root": {
 						color: "#afc8fb",
+						"& fieldset": { borderColor: "#4f86f8" },
+						"&:hover fieldset": { borderColor: "#afc8fb", borderWidth: "3px" },
+						"&.Mui-focused fieldset": { borderColor: "#4f86f8", borderWidth: "2px" },
 					},
+					"& .MuiInputLabel-root": { color: "#afc8fb" },
+					"& .MuiInputLabel-root.Mui-focused": { color: "#ffffff" },
 				}}
 			/>
 
 			<TextField 
-				id="outlined-controlled" 
+				id="outlined-controlled-name" 
 				label={`${selectedType} Name`}
 				value={entryName} 
-				onChange={(event) => {setEntryName(event.target.value);}}
-
-				sx={{"& .MuiOutlinedInput-root": 
-						{color: "#afc8fb","& fieldset": {borderColor: "#4f86f8",},
-
-						"&:hover fieldset": {
-						borderColor: "#afc8fb", 
-						borderWidth: "3px",
-						},
-
-						"&.Mui-focused fieldset": {
-						borderColor: "#4f86f8",
-						borderWidth: "4px",
-						},
-					},
-
-					"& .MuiInputLabel-root": {
+				onChange={(event) => setEntryName(event.target.value)}
+				sx={{
+					"& .MuiOutlinedInput-root": {
 						color: "#afc8fb",
+						"& fieldset": { borderColor: "#4f86f8" },
+						"&:hover fieldset": { borderColor: "#afc8fb", borderWidth: "3px" },
+						"&.Mui-focused fieldset": { borderColor: "#4f86f8", borderWidth: "2px" },
 					},
+					"& .MuiInputLabel-root": { color: "#afc8fb" },
+					"& .MuiInputLabel-root.Mui-focused": { color: "#ffffff" },
 				}}
 			/>
 
 			{/* enter */}
 			<Tooltip title="Enter" arrow>
 				<IconButton onClick={() => createEntry(entryValue, selectedDate, selectedType, entryName)} variant="contained" color="primary" sx={{ padding: '16px' }}>
-					<AddBoxIcon sx={{ fontSize: 32 }}/>
+					<AddBoxIcon sx={{ fontSize: 32, "&:hover": { color: "#afc8fb" } }}/>
 				</IconButton>
 			</Tooltip>
 
-			<FormControl sx={{ ml: 'auto', mr:'auto', width: 200, "& .MuiOutlinedInput-root": 
-						{color: "#afc8fb","& fieldset": {borderColor: "#4f86f8",},
-
-						"&:hover fieldset": {
-						borderColor: "#afc8fb", 
-						borderWidth: "3px",
-						},
-
-						"&.Mui-focused fieldset": {
-						borderColor: "#4f86f8",
-						borderWidth: "4px",
-						},
-					},
-
-					"& .MuiInputLabel-root": {
+			<FormControl sx={{ ml: 'auto', mr:'auto', width: 200, 
+					"& .MuiOutlinedInput-root": {
 						color: "#afc8fb",
-					}, }}>
-				<InputLabel id="demo-multiple-checkbox-label">Filter Types</InputLabel>
-				<Select
-					labelId="demo-multiple-checkbox-label"
-					id="demo-multiple-checkbox"
-					multiple
-					value={filteredTypes}
-					onChange={handleChange}
-					input={<OutlinedInput label="Filter Types" />}
-					renderValue={(selected) => selected.join(', ')}
-					MenuProps={MenuProps}
-				>
+						"& fieldset": { borderColor: "#4f86f8" },
+						"&:hover fieldset": { borderColor: "#afc8fb", borderWidth: "3px" },
+						"&.Mui-focused fieldset": { borderColor: "#4f86f8", borderWidth: "2px" },
+					},
+						"& .MuiInputLabel-root": { color: "#afc8fb" },
+						"& .MuiInputLabel-root.Mui-focused": { color: "#ffffff" },
+					}}
+			>
+			<InputLabel id="demo-multiple-checkbox-label">Filter Types</InputLabel>
+			<Select
+				labelId="demo-multiple-checkbox-label"
+				id="demo-multiple-checkbox"
+				multiple
+				value={filteredTypes}
+				onChange={handleChange}
+				input={<OutlinedInput label="Filter Types" />}
+				renderValue={(selected) => selected.join(', ')}
+				MenuProps={MenuProps}
+			>
 				{typeData.map((type) => {
 					const selected = filteredTypes.includes(type.name);
 					const SelectionIcon = selected ? CheckBoxIcon : CheckBoxOutlineBlankIcon;
