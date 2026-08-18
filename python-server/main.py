@@ -8,7 +8,7 @@ from flask_cors import CORS
 from flask_migrate import Migrate
 
 from database import db, Entry, EntryType, User
-from functions import invalidUserParamaters, invalidText
+from functions import invalidUserParamaters, validText
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 from dotenv import load_dotenv
@@ -93,6 +93,19 @@ def create_entry():
         
     usersDesc = data.get("description") # get user description from payload
     userDate = data.get("date") # get user date from payload
+
+    if not validText(usersDesc):
+        return jsonify({
+            'success': False,
+            "message": "Invalid entry description."
+        }), 400
+
+    if not userDate:
+        return jsonify({
+            'success': False,
+            "message": "Invalid entry date."
+        }), 400
+    
     userDateAsDT = datetime.fromisoformat(userDate) # convert the string given by user (in iso format) to a python datetime object
     usersEntryName = data.get("entry_name")
 
@@ -113,7 +126,7 @@ def create_entry():
     #  or
     #  contains the type name,
     #  set the entry name to the type name.
-    if not invalidText(usersEntryName) or (usersTypeName.lower() in usersEntryName.lower()):
+    if not validText(usersEntryName) or (usersTypeName.lower() in usersEntryName.lower()):
         entryName = usersTypeName
     else: # only use the users submitted name if it is valid and the type name does not exist in it.
         entryName = usersEntryName

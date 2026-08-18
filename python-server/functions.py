@@ -17,7 +17,7 @@ def invalidUserParamaters(username, password, email='name@email.net'):
     
     return False, 'Valid user parameters'
 
-def invalidText(text):
+def validText(text):
     cleaned = text.strip()
 
     # place all characters into a list

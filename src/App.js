@@ -285,13 +285,18 @@ const AppContent = () => {
 				},
 				body: JSON.stringify(payload)          // Converts object into a valid JSON string
 			});
+			
+			const responseData = await response.json(); // Parses returning JSON string to object
 
 			if (!response.ok) {
+				showMessage(
+					responseData.message,
+					`Invalid (${response.status})`,
+					'error'
+				);
 				throw new Error(`HTTP error! Status: ${response.status}`);
-				// showMessage()
 			}
 
-			const responseData = await response.json(); // Parses returning JSON string to object
 			console.log('Success:', responseData);
 
 			handleGetAll();
@@ -327,8 +332,8 @@ const AppContent = () => {
 				const responseData = await response.json();
 				
 				showMessage(
-					`Invalid (${response.status})`,
 					responseData.message,
+					`Invalid (${response.status})`,
 					'error'
 				);
 
@@ -339,15 +344,15 @@ const AppContent = () => {
 			console.log('Success:', responseData);
 			if(response.status === 200){
 				showMessage(
-					`Successfully created account "${username}"! (${response.status})`,
 					responseData.message,
+					`Successfully created account "${username}"! (${response.status})`,
 					'success'
 				);
 			}
 			else{
 				showMessage(
-					`Could not create account. (${response.status})`,
 					responseData.message,
+					`Could not create account. (${response.status})`,
 					'error'
 				);
 			}
@@ -381,8 +386,8 @@ const AppContent = () => {
 				const responseData = await response.json();
 				
 				showMessage(
-					`Invalid (${response.status})`,
 					responseData.message,
+					`Invalid (${response.status})`,
 					'error'
 				);
 
@@ -394,10 +399,10 @@ const AppContent = () => {
 			localStorage.setItem("authToken", responseData.token);
 			checkLogin();
 			showMessage(
-					`Logged in successfully! (${response.status})`,
-					responseData.message,
-					'success'
-				);
+				responseData.message,
+				`Logged in successfully! (${response.status})`,
+				'success'
+			);
 		} 
 		catch (err) {
 			console.error(err);
@@ -422,8 +427,18 @@ const AppContent = () => {
 
 			if (!response.ok) {
 				const responseData = await response.json();
+				showMessage(
+					responseData.message,
+					`Server not found. Still logged out successfully! (${response.status})`,
+					'success'
+				);
+				// can still perform log out on the frontend; 
+				// the server does not need to clear anything.
+				setLoggedIn(0);
+				localStorage.removeItem("authToken");
+				setUserID(null);
+				setUsersName(null);
 				throw new Error(`HTTP error! Status: ${response.status} Message: ${responseData.message}`);
-
 			}
 
 			const responseData = await response.json(); // Parses returning JSON string to object
@@ -432,11 +447,16 @@ const AppContent = () => {
 			localStorage.removeItem("authToken");
 			setUserID(null);
 			setUsersName(null);
+			showMessage(
+				responseData.message,
+				`Logged out successfully! (${response.status})`,
+				'success'
+			);
 		}
 		catch (err) {
 			console.error(err);
 		}
-	}, [server_url]);
+	}, [server_url, showMessage]);
 
 	// check if user has login credentials already
 	useEffect(() => {checkLogin();},[checkLogin, server_url]); 
