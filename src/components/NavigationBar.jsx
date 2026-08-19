@@ -27,7 +27,7 @@ function NavigationBar({
 						{ usersName ? `${title} - ${usersName}` : title}
 					</Typography>
 
-					<FormControl 
+					{0 === 1 && <FormControl 
 						sx={{
 							"& .MuiOutlinedInput-root": {
 								color: "#052668",
@@ -62,7 +62,7 @@ function NavigationBar({
 								})}
 								</Select> 
 							</Box>
-					</FormControl>
+					</FormControl>}
 
 
 					{loggedIn === 1 &&
