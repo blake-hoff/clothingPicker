@@ -578,7 +578,8 @@ def my_invalid_token_callback(error_string):
 def my_unauthorized_callback(error_string):
     return jsonify({
         "logged_in": False,
-        "error": "Missing authorization header."
+        "error": "Missing authorization header.",
+        "details": error_string
     }), 200
 
 @app.route("/api/auth/user/")

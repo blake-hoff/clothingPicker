@@ -150,29 +150,33 @@ const AppContent = () => {
 		let path = '/auth/user/';
 		let url = server_url + path;
 		const token = localStorage.getItem("authToken");
+		
+		// only make the request if the token exists.
+		if(token){
+			const response = await fetch(url, {
+				method: "GET",
+				headers: {
+					"Authorization": `Bearer ${token}`
+				}}
+			);
+			const data = await response.json();
 
-		const response = await fetch(url, {
-			method: "GET",
-			headers: {
-				"Authorization": `Bearer ${token}`
-			}}
-		);
-
-		const data = await response.json();
-
-		if(data.logged_in){
-			setLoggedIn(1);
-			handleGetAll();
-			setUserID(data.id);
-			setUsersName(data.username)
-			console.log("Logged in");
+			if(data.logged_in){
+				setLoggedIn(1);
+				handleGetAll();
+				setUserID(data.id);
+				setUsersName(data.username)
+				console.log("Logged in");
+				return;
+			}
 		}
-		else{
-			setLoggedIn(0);
-			localStorage.removeItem("authToken");
-			setUserID(null);
-			console.log("Not logged in");
-		}
+		// reach here if the token does not exist 
+		// or the user is not logged in
+
+		setLoggedIn(0);
+		localStorage.removeItem("authToken");
+		setUserID(null);
+		console.log("Not logged in");
 	}, [handleGetAll, server_url]);
 
 	const handleSetID = React.useCallback(async (item_id, item_date, item_type, item_name, item_desc) => {
